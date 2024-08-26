@@ -34,7 +34,7 @@ class SteamReviews(db.Model):
     avg_hours_played_neu = db.Column(db.Float, nullable=False)
     avg_hours_played_neg = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.now())
-    scraper_session_id = db.Column(db.Integer, db.ForeignKey("review_scraper_sessions.id"), nullable=False, unique=True)
+    scraper_session_id = db.Column(db.Integer, db.ForeignKey("review_scraper_sessions.id"), nullable=False)
 
     def __init__(self, game_id:str, 
                 steam_positives:int, steam_negatives:int, 
@@ -81,7 +81,7 @@ def games():
             })
         return jsonify({
             "status": "success",
-            "games": game_list
+            "data": game_list
         }), 200
     else:
         req_body = request.get_json()
@@ -162,7 +162,8 @@ def review_scrapers():
             review_sessions_list.append({
                 "id": session.id,
                 "startDate": session.start_date.isoformat(),
-                "success": session.success
+                "success": session.success,
+                "endDate": session.end_date.isoformat() if session.end_date is not None else session.end_date
             })
         return jsonify({
             "status": "success",
@@ -187,6 +188,8 @@ def review_scraper(id:int):
         if review_scraper_to_update != None:
             if "success" in req_body:
                 review_scraper_to_update.success = req_body["success"]
+            if "endDate" in req_body:
+                review_scraper_to_update.end_date = datetime.fromisoformat(req_body["endDate"])
             
             db.session.commit()
         return jsonify({
