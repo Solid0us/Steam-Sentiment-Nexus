@@ -2,11 +2,13 @@ from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_cors import CORS
+from flask_migrate import Migrate
 app = Flask(__name__)
 CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///database.db"
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 class SteamGames(db.Model):
     __tablename__ = 'steam_games'
@@ -190,6 +192,8 @@ def review_scraper(id:int):
                 review_scraper_to_update.success = req_body["success"]
             if "endDate" in req_body:
                 review_scraper_to_update.end_date = datetime.fromisoformat(req_body["endDate"])
+            if "debugMessage" in req_body:
+                review_scraper_to_update.debug_message = req_body["debugMessage"]
             
             db.session.commit()
         return jsonify({

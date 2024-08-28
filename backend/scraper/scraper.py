@@ -4,6 +4,7 @@ from urllib.parse import quote
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoConfig, pipeline
 from scipy.special import softmax
 from datetime import datetime
+import torch
 
 FLASK_API_BASE_URL = "http://localhost:5000/"
 ROBERTA_MODEL = f"cardiffnlp/twitter-roberta-base-sentiment-latest"
@@ -15,10 +16,11 @@ def create_review_scraping_session():
     review_session_id: int = scraper_api_response.json()["data"]["id"]
     return review_session_id
 
-def end_review_scraping_session(isSuccess: bool, scraper_id: int):
+def end_review_scraping_session(isSuccess: bool, scraper_id: int, debug_message: str = ""):
     requests.patch(f"{FLASK_API_BASE_URL}review-session-scrapers/{scraper_id}", json = {
         "success": isSuccess,
-        "endDate": datetime.now().isoformat()
+        "endDate": datetime.now().isoformat(),
+        "debugMessage": debug_message
     }, headers={
         "Content-Type": "application/json"
     })
@@ -34,8 +36,12 @@ def get_active_games():
     return [x["id"] for x in games["data"] if x["isActive"] == True]
 
 def initialize_review_scraper():
+    print(torch.cuda.is_available())
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+    
     tokenizer = AutoTokenizer.from_pretrained(ROBERTA_MODEL)
-    roberta_model = AutoModelForSequenceClassification.from_pretrained(ROBERTA_MODEL)
+    roberta_model = AutoModelForSequenceClassification.from_pretrained(ROBERTA_MODEL).to(device)
     try:
         game_ids_list = get_active_games()
     except:
@@ -72,7 +78,7 @@ def initialize_review_scraper():
                         number_of_reviews += 1
                         review_text = review["review"]
                         # Steam API gives review time in minutes, will store in hours
-                        hours_played_at_review = review["author"]["playtime_at_review"] / 60 
+                        
                         encoded_text = tokenizer(review_text,truncation=True,max_length=512, return_tensors="pt")
                         output = roberta_model(**encoded_text)
                         scores = output[0][0].detach().numpy()
@@ -83,6 +89,12 @@ def initialize_review_scraper():
                         # If there happens to be a case where one or more of the sentiment scores
                         # to be equal, give the benefit of the doubt and label as more positive
                         max_score = max(score_pos, score_neu, score_neg)
+                        try:
+                            hours_played_at_review = review["author"]["playtime_at_review"] / 60 
+                            
+                        except:
+                            print(f"User {review["author"]["steamid"]} refunded the game.")
+                            hours_played_at_review = review["author"]["playtime_forever"] / 60 
                         if (max_score == score_pos):
                             hours_played_pos_sum += hours_played_at_review
                         elif (max_score == score_neu):
@@ -103,13 +115,12 @@ def initialize_review_scraper():
                         reviewSummaryData["avgHoursPlayedNeg"] = hours_played_neg_sum / number_of_reviews
                         break
                     prev_cursor = next_cursor
-                    time.sleep(1)
                 else:
                     raise Exception (f"Could not reach URL with status {response.status_code}")
             create_review_results(reviewSummaryData=reviewSummaryData)
         except Exception as e:
             print(e)
-            end_review_scraping_session(isSuccess=False, scraper_id=scraper_id)
+            end_review_scraping_session(isSuccess=False, scraper_id=scraper_id, debug_message=e)
             return
     # End Session when entire job is done
     end_review_scraping_session(isSuccess=True, scraper_id=scraper_id)
