@@ -93,7 +93,7 @@ def initialize_review_scraper():
                             hours_played_at_review = review["author"]["playtime_at_review"] / 60 
                             
                         except:
-                            print(f"User {review["author"]["steamid"]} refunded the game.")
+                            print(f"User {review['author']['steamid']} refunded the game.")
                             hours_played_at_review = review["author"]["playtime_forever"] / 60 
                         if (max_score == score_pos):
                             hours_played_pos_sum += hours_played_at_review
