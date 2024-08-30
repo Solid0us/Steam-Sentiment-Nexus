@@ -26,28 +26,32 @@ class SteamReviews(db.Model):
     __tablename__ = "steam_reviews"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     game_id = db.Column(db.String, db.ForeignKey('steam_games.id'), nullable=False)
-    steam_positives = db.Column(db.Integer, nullable=False)
-    steam_negatives = db.Column(db.Integer, nullable=False)
-    steam_review_description = db.Column(db.String, nullable=False)
-    roberta_pos_avg = db.Column(db.Float, nullable=False)
-    roberta_neu_avg = db.Column(db.Float, nullable=False)
-    roberta_neg_avg = db.Column(db.Float, nullable=False)
-    avg_hours_played_pos = db.Column(db.Float, nullable=False)
-    avg_hours_played_neu = db.Column(db.Float, nullable=False)
-    avg_hours_played_neg = db.Column(db.Float, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.now())
+    steam_positives = db.Column(db.Integer, nullable=True)
+    steam_negatives = db.Column(db.Integer, nullable=True)
+    steam_review_description = db.Column(db.String, nullable=True)
+    roberta_pos_avg = db.Column(db.Float, nullable=True)
+    roberta_neu_avg = db.Column(db.Float, nullable=True)
+    roberta_neg_avg = db.Column(db.Float, nullable=True)
+    avg_hours_played_pos = db.Column(db.Float, nullable=True)
+    avg_hours_played_neu = db.Column(db.Float, nullable=True)
+    avg_hours_played_neg = db.Column(db.Float, nullable=True)
+    created_date = db.Column(db.DateTime, default=datetime.now())
+    end_date = db.Column(db.DateTime, nullable=True)
+    success = db.Column(db.Boolean, default=False)
     scraper_session_id = db.Column(db.Integer, db.ForeignKey("review_scraper_sessions.id"), nullable=False)
 
     def __init__(self, game_id:str, 
-                steam_positives:int, steam_negatives:int, 
-                steam_review_description:str,
-                roberta_pos_avg: float,
-                roberta_neu_avg: float,
-                roberta_neg_avg: float,
-                avg_hours_played_pos: float,
-                avg_hours_played_neu: float,
-                avg_hours_played_neg: float,
-                scraper_session_id: int):
+                scraper_session_id: int,
+                steam_positives:int = None, steam_negatives:int = None, 
+                steam_review_description:str = None,
+                roberta_pos_avg: float = None,
+                roberta_neu_avg: float = None,
+                roberta_neg_avg: float = None,
+                avg_hours_played_pos: float = None,
+                avg_hours_played_neu: float = None,
+                avg_hours_played_neg: float = None,
+                end_date: datetime = None
+                ):
         self.game_id = game_id
         self.steam_positives = steam_positives
         self.steam_negatives = steam_negatives
@@ -58,8 +62,9 @@ class SteamReviews(db.Model):
         self.avg_hours_played_pos = avg_hours_played_pos
         self.avg_hours_played_neu = avg_hours_played_neu
         self.avg_hours_played_neg = avg_hours_played_neg
-        self.timestamp = datetime.now()
+        self.created_date = datetime.now()
         self.scraper_session_id = scraper_session_id
+        self.end_date = end_date
 
 class ReviewScraperSessions(db.Model):
     __tablename__ = "review_scraper_sessions"
@@ -126,34 +131,53 @@ def reviews():
         req_body = request.get_json()
         try:
             game_id = req_body["gameId"]
-            steam_positives = req_body["steamPositives"]
-            steam_negatives = req_body["steamNegatives"]
-            steam_review_description = req_body["steamReviewDescription"]
-            roberta_pos_avg = req_body["robertaPosAvg"]
-            roberta_neu_avg = req_body["robertaNeuAvg"]
-            roberta_neg_avg = req_body["robertaNegAvg"]
-            avg_hours_played_pos = req_body["avgHoursPlayedPos"]
-            avg_hours_played_neu = req_body["avgHoursPlayedNeu"]
-            avg_hours_played_neg = req_body["avgHoursPlayedNeg"]
             scraper_session_id = req_body["scraperSessionId"]
-
-            db.session.add(SteamReviews(game_id=game_id, steam_positives=steam_positives, 
-                                        steam_negatives=steam_negatives, 
-                                        steam_review_description=steam_review_description,
-                                        roberta_pos_avg=roberta_pos_avg,
-                                        roberta_neu_avg=roberta_neu_avg,
-                                        roberta_neg_avg=roberta_neg_avg,
-                                        avg_hours_played_pos=avg_hours_played_pos,
-                                        avg_hours_played_neu=avg_hours_played_neu,
-                                        avg_hours_played_neg=avg_hours_played_neg,
-                                        scraper_session_id=scraper_session_id))
+            review_to_add = SteamReviews(game_id=game_id, scraper_session_id=scraper_session_id)
+            db.session.add(review_to_add)
             db.session.commit()
         except Exception as e:
             print(e)
             return jsonify({"status": "failure"}), 400
         return jsonify({
-            "status":"success"
+            "status":"success",
+            "data": {
+                "id": review_to_add.id
+            }
         }),201
+    
+@app.route("/reviews/<int:id>", methods=["PATCH"])
+def review(id:int):
+    req_body = request.get_json()
+    review_to_update:SteamReviews = SteamReviews.query.filter_by(id=id).first()
+    if request.method == "PATCH":
+        if review_to_update != None:
+            if "success" in req_body:
+                review_to_update.success = req_body["success"] 
+            if "steamPositives" in req_body:
+                review_to_update.steam_positives = req_body["steamPositives"]
+            if "steamNegatives" in req_body:
+                review_to_update.steam_negatives = req_body["steamNegatives"] 
+            if "steamReviewDescription" in req_body:
+                review_to_update.steam_review_description = req_body["steamReviewDescription"]  
+            if "robertaPosAvg" in req_body:
+                review_to_update.roberta_pos_avg = req_body["robertaPosAvg"] 
+            if "robertaNeuAvg" in req_body:
+                review_to_update.roberta_neu_avg = req_body["robertaNeuAvg"]
+            if "robertaNegAvg" in req_body:
+                review_to_update.roberta_neg_avg = req_body["robertaNegAvg"] 
+            if "avgHoursPlayedPos" in req_body:
+                review_to_update.avg_hours_played_pos = req_body["avgHoursPlayedPos"] 
+            if "avgHoursPlayedNeu" in req_body:
+                review_to_update.avg_hours_played_neu = req_body["avgHoursPlayedNeu"]
+            if "avgHoursPlayedNeg" in req_body:
+                review_to_update.avg_hours_played_neg = req_body["avgHoursPlayedNeg"]
+            if "endDate" in req_body:
+                review_to_update.end_date = datetime.now()
+            print(f"Updating review: {review_to_update.id, review_to_update.end_date}")
+            db.session.commit()
+        return jsonify({
+            "status": "success"
+        })
 
 @app.route("/review-session-scrapers", methods=["GET", "POST"])
 def review_scrapers():
@@ -175,7 +199,6 @@ def review_scrapers():
         new_session = ReviewScraperSessions()
         db.session.add(new_session)
         db.session.commit()
-        
         return jsonify({
              "status": "success",
              "data": {
