@@ -39,6 +39,7 @@ class SteamReviews(db.Model):
     end_date = db.Column(db.DateTime, nullable=True)
     success = db.Column(db.Boolean, default=False)
     scraper_session_id = db.Column(db.Integer, db.ForeignKey("review_scraper_sessions.id"), nullable=False)
+    number_scraped = db.Column(db.Integer, default=0)
 
     def __init__(self, game_id:str, 
                 scraper_session_id: int,
@@ -173,6 +174,8 @@ def review(id:int):
                 review_to_update.avg_hours_played_neg = req_body["avgHoursPlayedNeg"]
             if "endDate" in req_body:
                 review_to_update.end_date = datetime.now()
+            if "numberScraped" in req_body:
+                review_to_update.number_scraped = req_body["numberScraped"]
             print(f"Updating review: {review_to_update.id, review_to_update.end_date}")
             db.session.commit()
         return jsonify({

@@ -73,7 +73,7 @@ def initialize_review_scraper():
         counter = 1
         reviewSummaryData = {"steamPositives": 0, "steamNegatives": 0, "steamReviewDescription": "", "robertaPosAvg": 0,
                 "robertaNeuAvg": 0, "robertaNegAvg": 0, "avgHoursPlayedPos": 0, "avgHoursPlayedNeu": 0, "avgHoursPlayedNeg": 0,
-                "endDate": None, "success": False}
+                "endDate": None, "success": False, "numberScraped": 0}
         number_of_reviews = 0
         roberta_pos_sum = 0
         roberta_neu_sum = 0
@@ -126,13 +126,10 @@ def initialize_review_scraper():
                     counter += 1
                     if next_cursor == prev_cursor:
                         print(f"Reached the last cursor value of {next_cursor}")
-                        
                         break
                     prev_cursor = next_cursor
                 else:
                     raise Exception (f"Could not reach URL with status {response.status_code}")
-                # TESTING
-                break
             reviewSummaryData["robertaPosAvg"] = roberta_pos_sum / number_of_reviews
             reviewSummaryData["robertaNeuAvg"] = roberta_neu_sum / number_of_reviews
             reviewSummaryData["robertaNegAvg"] = roberta_neg_sum / number_of_reviews
@@ -141,12 +138,14 @@ def initialize_review_scraper():
             reviewSummaryData["avgHoursPlayedNeg"] = hours_played_neg_sum / number_of_reviews
             reviewSummaryData["endDate"] = datetime.now().isoformat()
             reviewSummaryData["success"] = True
+            reviewSummaryData["numberScraped"] = number_of_reviews
             update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData)
             # create_review_results(reviewSummaryData=reviewSummaryData)
         except Exception as e:
             print(e)
             reviewSummaryData["endDate"] = datetime.now().isoformat()
             reviewSummaryData["success"] = False
+            reviewSummaryData["numberScraped"] = number_of_reviews
             update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData)
             end_review_scraping_session(isSuccess=False, scraper_id=scraper_id, debug_message=e)
             return
