@@ -76,7 +76,7 @@ class ReviewScraperSessions(db.Model):
     debug_message = db.Column(db.String, nullable=True)
     reviews = db.relationship("SteamReviews")
 
-@app.route("/games", methods=["GET", "POST"])
+@app.route("/api/v1/games", methods=["GET", "POST"])
 def games():
     if request.method == "GET":
         games = db.session.query(SteamGames)
@@ -102,7 +102,7 @@ def games():
             "status":"success"
         }),201
     
-@app.route("/reviews", methods=["GET", "POST"])
+@app.route("/api/v1/reviews", methods=["GET", "POST"])
 def reviews():
     if request.method == "GET":
         review_games: list[tuple[SteamReviews, SteamGames]] = db.session.query(SteamReviews, SteamGames).join(SteamGames).all()
@@ -146,7 +146,7 @@ def reviews():
             }
         }),201
     
-@app.route("/reviews/<int:id>", methods=["PATCH"])
+@app.route("/api/v1/reviews/<int:id>", methods=["PATCH"])
 def review(id:int):
     req_body = request.get_json()
     review_to_update:SteamReviews = SteamReviews.query.filter_by(id=id).first()
@@ -182,7 +182,7 @@ def review(id:int):
             "status": "success"
         })
 
-@app.route("/review-session-scrapers", methods=["GET", "POST"])
+@app.route("/api/v1/review-session-scrapers", methods=["GET", "POST"])
 def review_scrapers():
     if request.method == "GET":
         review_sessions: list[ReviewScraperSessions] = db.session.query(ReviewScraperSessions).all()
@@ -208,7 +208,7 @@ def review_scrapers():
                  "id": new_session.id
              }
         }), 201
-@app.route("/review-session-scrapers/<int:id>", methods=["PATCH"])
+@app.route("/api/v1/review-session-scrapers/<int:id>", methods=["PATCH"])
 def review_scraper(id:int):
     req_body = request.get_json()
     review_scraper_to_update:ReviewScraperSessions = ReviewScraperSessions.query.filter_by(id=id).first()

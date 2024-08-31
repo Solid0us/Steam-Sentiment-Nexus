@@ -1,12 +1,11 @@
 import requests
-import time
 from urllib.parse import quote
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, AutoConfig, pipeline
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from scipy.special import softmax
 from datetime import datetime
 import torch
 
-FLASK_API_BASE_URL = "http://localhost:5000/"
+FLASK_API_BASE_URL = "http://localhost:5000/api/v1/"
 ROBERTA_MODEL = f"cardiffnlp/twitter-roberta-base-sentiment-latest"
 
 def create_review_scraping_session():
@@ -129,7 +128,7 @@ def initialize_review_scraper():
                         break
                     prev_cursor = next_cursor
                 else:
-                    raise Exception (f"Could not reach URL with status {response.status_code}")
+                    break
             reviewSummaryData["robertaPosAvg"] = roberta_pos_sum / number_of_reviews
             reviewSummaryData["robertaNeuAvg"] = roberta_neu_sum / number_of_reviews
             reviewSummaryData["robertaNegAvg"] = roberta_neg_sum / number_of_reviews
@@ -140,17 +139,16 @@ def initialize_review_scraper():
             reviewSummaryData["success"] = True
             reviewSummaryData["numberScraped"] = number_of_reviews
             update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData)
-            # create_review_results(reviewSummaryData=reviewSummaryData)
         except Exception as e:
-            print(e)
+            print(f"Something went wrong with game ID:{game_id}")
             reviewSummaryData["endDate"] = datetime.now().isoformat()
             reviewSummaryData["success"] = False
             reviewSummaryData["numberScraped"] = number_of_reviews
             update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData)
             end_review_scraping_session(isSuccess=False, scraper_id=scraper_id, debug_message=e)
-            return
     # End Session when entire job is done
     end_review_scraping_session(isSuccess=True, scraper_id=scraper_id)
+    input('Pressure "Enter" to close the console.')
     
         
 initialize_review_scraper()
