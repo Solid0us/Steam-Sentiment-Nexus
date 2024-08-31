@@ -102,6 +102,47 @@ def games():
             "status":"success"
         }),201
     
+@app.route("/api/v1/games/<string:id>/reviews", methods=["GET"])
+def gameReviews(id:str):
+    if request.method == "GET":
+        response: list[tuple[SteamGames, SteamReviews]] = \
+            db.session.query(SteamGames, SteamReviews)\
+            .filter(SteamGames.id == id).join(SteamReviews)\
+            .all()
+        gameObj = {
+            "id": "",
+            "name": "",
+            "isActive": False
+        }
+        reviews = []
+        for game, review in response:
+            gameObj["id"] = game.id
+            gameObj["name"] = game.name
+            gameObj["isActive"] = game.isActive
+            reviews.append({
+                "id": review.id,
+                "steamPositives": review.steam_positives,
+                "steamNegatives": review.steam_negatives,
+                "steam_review_description": review.steam_review_description,
+                "robertaPosAvg": review.roberta_pos_avg,
+                "robertaNeuAvg": review.roberta_neu_avg,
+                "robertaNegAvg": review.roberta_neg_avg,
+                "avgHoursPlayedPos": review.avg_hours_played_pos,
+                "avgHoursPlayedNeu": review.avg_hours_played_neu,
+                "avgHoursPlayedNeg": review.avg_hours_played_neg,
+                "createdDate": review.created_date,
+                "endDate": review.end_date,
+                "success": review.success,
+                "number_scraped": review.number_scraped
+            })
+        return jsonify({
+            "status": "success",
+            "data": {
+                "game": gameObj,
+                "reviews": reviews
+            }
+        })
+    
 @app.route("/api/v1/reviews", methods=["GET", "POST"])
 def reviews():
     if request.method == "GET":
