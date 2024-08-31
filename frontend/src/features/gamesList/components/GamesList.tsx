@@ -10,7 +10,7 @@ const GamesList = ({ gamesList }: GamesListProps) => {
     <div className="flex flex-col gap-3 p-3">
       <h1 className="text-primary text-lg text-center font-bold">Games List</h1>
       {gamesList?.map((val) => (
-        <div className="flex flex-row gap-3">
+        <div key={val.id} className="flex flex-row gap-3">
           <Label>{val.name}</Label>
           <Checkbox defaultChecked={val.isActive ? true : false} />
         </div>

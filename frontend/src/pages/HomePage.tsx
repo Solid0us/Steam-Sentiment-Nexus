@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import GamesList from "../features/gamesList/components/GamesList";
 import { getGames } from "../services/gameServices";
 import { SteamGames } from "../lib/db_interface";
-import SentimentAnalysisChart from "../features/sentimentChart/SentimentAnalysisChart";
+import SentimentAnalysisCharts from "../features/sentimentChart/SentimentAnalysisCharts";
 
 const HomePage = () => {
   const { data: gamesList } = useQuery({
@@ -18,7 +18,7 @@ const HomePage = () => {
         <GamesList gamesList={gamesList ?? []} />
       </section>
       <section>
-        <SentimentAnalysisChart gamesList={gamesList ?? []} />
+        <SentimentAnalysisCharts gamesList={gamesList ?? []} />
       </section>
     </div>
   );

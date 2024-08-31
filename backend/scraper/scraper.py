@@ -2,7 +2,7 @@ import requests
 from urllib.parse import quote
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 from scipy.special import softmax
-from datetime import datetime
+from datetime import datetime, timezone
 import torch
 
 FLASK_API_BASE_URL = "http://localhost:5000/api/v1/"
@@ -33,7 +33,7 @@ def create_review(gameId: str, scrapperSessionId:int):
 def end_review_scraping_session(isSuccess: bool, scraper_id: int, debug_message: str = ""):
     requests.patch(f"{FLASK_API_BASE_URL}review-session-scrapers/{scraper_id}", json = {
         "success": isSuccess,
-        "endDate": datetime.now().isoformat(),
+        "endDate": datetime.now(timezone.utc).isoformat(),
         "debugMessage": debug_message
     }, headers={
         "Content-Type": "application/json"
@@ -127,6 +127,7 @@ def initialize_review_scraper():
                         print(f"Reached the last cursor value of {next_cursor}")
                         break
                     prev_cursor = next_cursor
+                    break
                 else:
                     break
             reviewSummaryData["robertaPosAvg"] = roberta_pos_sum / number_of_reviews
@@ -135,17 +136,18 @@ def initialize_review_scraper():
             reviewSummaryData["avgHoursPlayedPos"] = hours_played_pos_sum / number_of_reviews
             reviewSummaryData["avgHoursPlayedNeu"] = hours_played_neu_sum / number_of_reviews
             reviewSummaryData["avgHoursPlayedNeg"] = hours_played_neg_sum / number_of_reviews
-            reviewSummaryData["endDate"] = datetime.now().isoformat()
+            reviewSummaryData["endDate"] = datetime.now(timezone.utc).isoformat()
             reviewSummaryData["success"] = True
             reviewSummaryData["numberScraped"] = number_of_reviews
             update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData)
         except Exception as e:
             print(f"Something went wrong with game ID:{game_id}")
-            reviewSummaryData["endDate"] = datetime.now().isoformat()
+            reviewSummaryData["endDate"] = datetime.now(timezone.utc).isoformat()
             reviewSummaryData["success"] = False
             reviewSummaryData["numberScraped"] = number_of_reviews
             update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData)
             end_review_scraping_session(isSuccess=False, scraper_id=scraper_id, debug_message=e)
+        break
     # End Session when entire job is done
     end_review_scraping_session(isSuccess=True, scraper_id=scraper_id)
     input('Pressure "Enter" to close the console.')

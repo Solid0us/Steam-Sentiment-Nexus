@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_cors import CORS
 from flask_migrate import Migrate
 app = Flask(__name__)
@@ -35,7 +35,7 @@ class SteamReviews(db.Model):
     avg_hours_played_pos = db.Column(db.Float, nullable=True)
     avg_hours_played_neu = db.Column(db.Float, nullable=True)
     avg_hours_played_neg = db.Column(db.Float, nullable=True)
-    created_date = db.Column(db.DateTime, default=datetime.now())
+    created_date = db.Column(db.DateTime, default=datetime.now(tz=timezone.utc))
     end_date = db.Column(db.DateTime, nullable=True)
     success = db.Column(db.Boolean, default=False)
     scraper_session_id = db.Column(db.Integer, db.ForeignKey("review_scraper_sessions.id"), nullable=False)
@@ -63,14 +63,14 @@ class SteamReviews(db.Model):
         self.avg_hours_played_pos = avg_hours_played_pos
         self.avg_hours_played_neu = avg_hours_played_neu
         self.avg_hours_played_neg = avg_hours_played_neg
-        self.created_date = datetime.now()
+        self.created_date = datetime.now(timezone.utc)
         self.scraper_session_id = scraper_session_id
         self.end_date = end_date
 
 class ReviewScraperSessions(db.Model):
     __tablename__ = "review_scraper_sessions"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    start_date = db.Column(db.DateTime, default=datetime.now())
+    start_date = db.Column(db.DateTime, default=datetime.now(tz=timezone.utc))
     end_date = db.Column(db.DateTime, nullable=True)
     success = db.Column(db.Boolean, default=False)
     debug_message = db.Column(db.String, nullable=True)
@@ -214,7 +214,7 @@ def review(id:int):
             if "avgHoursPlayedNeg" in req_body:
                 review_to_update.avg_hours_played_neg = req_body["avgHoursPlayedNeg"]
             if "endDate" in req_body:
-                review_to_update.end_date = datetime.now()
+                review_to_update.end_date = datetime.now(timezone.utc)
             if "numberScraped" in req_body:
                 review_to_update.number_scraped = req_body["numberScraped"]
             print(f"Updating review: {review_to_update.id, review_to_update.end_date}")
