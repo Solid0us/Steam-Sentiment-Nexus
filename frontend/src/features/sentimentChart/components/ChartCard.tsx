@@ -1,29 +1,11 @@
-import React, { ReactNode } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ReactNode } from "react";
+import { Card } from "@/components/ui/card";
 
 interface ChartCardProps {
-  title: string;
-  description?: string;
   children: ReactNode;
 }
-const ChartCard = ({ children, title, description }: ChartCardProps) => {
-  return (
-    <Card className="max-w-5xl w-full bg-slate-800">
-      <CardHeader>
-        <CardTitle className="text-primary text-center">{title}</CardTitle>
-        <CardDescription className="text-primary-foreground">
-          {description}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>{children}</CardContent>
-    </Card>
-  );
+const ChartCard = ({ children }: ChartCardProps) => {
+  return <Card className="max-w-5xl w-full bg-slate-800">{children}</Card>;
 };
 
 export default ChartCard;
