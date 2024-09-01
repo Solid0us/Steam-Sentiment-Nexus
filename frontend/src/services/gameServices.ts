@@ -32,6 +32,13 @@ export interface CreateGamesData {
   }[];
 }
 
+export interface UpdateGamesData {
+  games: {
+    id: string;
+    isActive: boolean;
+  }[];
+}
+
 export const getGames = async <T>() => {
   const response = await apiService.get<{ data: T }>("/v1/games");
   return response.data.data;
@@ -46,4 +53,8 @@ export const getReviewsByGameId = async (id: string) => {
 
 export const createGames = async (data: CreateGamesData) => {
   const response = await apiService.post("/v1/games", data);
+};
+
+export const updateGames = async (data: UpdateGamesData) => {
+  const response = await apiService.patch("v1/games", data);
 };

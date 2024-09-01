@@ -30,7 +30,10 @@ const HomePage = () => {
           Steam Sentiment Analysis
         </h1>
         <section className="border rounded-lg p-2">
-          <GamesList gamesList={gamesList ?? []} />
+          <GamesList
+            gamesList={gamesList ?? []}
+            refetchGamesList={refetchGamesList}
+          />
         </section>
         <section className="w-full items-center flex justify-center p-3">
           <AddGamesToListDialogButton gamesList={gamesList ?? []} />

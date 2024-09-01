@@ -20,6 +20,7 @@ import { SteamGames } from "@/lib/db_interface";
 import { Button } from "@/components/ui/button";
 import { createGames } from "@/services/gameServices";
 import { GameListContext } from "@/pages/HomePage";
+import { useToast } from "@/components/hooks/use-toast";
 
 type GamesToAdd = {
   gameId: string;
@@ -37,6 +38,8 @@ const AddGamesToListForm = ({
   gamesList,
   setAddGameDialogOpen,
 }: AddGamesToListFormProps) => {
+  const { toast } = useToast();
+
   const gameListContext = useContext(GameListContext);
   if (!gameListContext) {
     return <></>;
@@ -83,6 +86,9 @@ const AddGamesToListForm = ({
       });
       setAddGameDialogOpen(false);
       refetchGamesList();
+      toast({
+        title: "Game(s) Added",
+      });
     } catch (err) {
       console.log(err);
     }
@@ -105,7 +111,7 @@ const AddGamesToListForm = ({
             {filteredSteamGames.length === 0 ? (
               <p className="text-center">No Results</p>
             ) : (
-              filteredSteamGames.slice(0, 20).map((game) => (
+              filteredSteamGames.slice(0, 100).map((game) => (
                 <li
                   key={game.gameId}
                   className={`hover:cursor-pointer border-b hover:bg-slate-500 ${

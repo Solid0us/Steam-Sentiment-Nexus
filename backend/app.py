@@ -77,7 +77,7 @@ class ReviewScraperSessions(db.Model):
     debug_message = db.Column(db.String, nullable=True)
     reviews = db.relationship("SteamReviews")
 
-@app.route("/api/v1/games", methods=["GET", "POST"])
+@app.route("/api/v1/games", methods=["GET", "POST", "PATCH"])
 def games():
     if request.method == "GET":
         games = db.session.query(SteamGames)
@@ -92,7 +92,7 @@ def games():
             "status": "success",
             "data": game_list
         }), 200
-    else:
+    elif request.method == "POST":
         req_body = request.get_json()
         games: list[SteamGames] = []
         for game in req_body["games"]:
@@ -102,6 +102,18 @@ def games():
         return jsonify({
             "status":"success"
         }),201
+    else:
+        req_body = request.get_json()
+        games: list[SteamGames] = []
+        for game in req_body["games"]:
+            # print(game["isActive"])
+            game_to_update:SteamGames = SteamGames.query.filter_by(id=game["id"]).first()
+            game_to_update.isActive = game["isActive"]
+        db.session.commit()
+        return jsonify({
+            "status":"success"
+        }),200
+        
 @app.route("/api/v1/steam-apps", methods=["GET"])
 def steamApp():
     if request.method == "GET":
