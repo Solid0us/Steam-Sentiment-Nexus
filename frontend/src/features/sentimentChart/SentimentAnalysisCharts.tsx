@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SteamGames } from "../../lib/db_interface";
 import {
   Select,
@@ -31,13 +31,19 @@ const SentimentAnalysisCharts = ({
     queryFn: () => getReviewsByGameId(selectedGame?.id ?? "UNKNOWN"),
     enabled: !!selectedGame?.id,
   });
+
+  useEffect(() => {
+    if (gamesList) {
+      setSelectedGame(gamesList[0]);
+    }
+  }, [gamesList]);
   return (
     <div className="w-full p-3 flex flex-col gap-3 text-secondary-foreground">
       <div className="flex flex-col gap-3 items-center">
         <Label className="text-primary-foreground">
           Select a Game to Analyze
         </Label>
-        <Select onValueChange={handleSelectGame}>
+        <Select value={selectedGame?.id} onValueChange={handleSelectGame}>
           <SelectTrigger className="bg-primary-foreground max-w-52">
             <SelectValue
               className="text-primary-foreground"

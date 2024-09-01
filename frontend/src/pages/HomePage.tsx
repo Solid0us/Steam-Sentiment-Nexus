@@ -32,7 +32,9 @@ const HomePage = () => {
         <section className="border rounded-lg p-2">
           <GamesList gamesList={gamesList ?? []} />
         </section>
-        <AddGamesToListDialogButton gamesList={gamesList ?? []} />
+        <section className="w-full items-center flex justify-center p-3">
+          <AddGamesToListDialogButton gamesList={gamesList ?? []} />
+        </section>
         <section>
           <SentimentAnalysisCharts gamesList={gamesList ?? []} />
         </section>
