@@ -47,7 +47,7 @@ const SteamRecommendationChart = ({
 }: SteamRecommendationChartProps) => {
   const [percentPositiveData, setPercentPositiveData] =
     useState<PercentPositiveData>([]);
-  const [percentView, setPercentView] = useState(true);
+  const [percentView, setPercentView] = useState(false);
   const getPercentageRecommended = () => {
     let percentPositiveDataToAppend: PercentPositiveData = [];
     gameReviews?.reviews.forEach((review) => {

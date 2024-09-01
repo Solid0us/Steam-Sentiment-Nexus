@@ -24,6 +24,14 @@ export interface GetReviewsByGameIdData {
   }[];
 }
 
+export interface CreateGamesData {
+  games: {
+    id: string;
+    name: string;
+    isActive: boolean;
+  }[];
+}
+
 export const getGames = async <T>() => {
   const response = await apiService.get<{ data: T }>("/v1/games");
   return response.data.data;
@@ -34,4 +42,8 @@ export const getReviewsByGameId = async (id: string) => {
     `/v1/games/${id}/reviews`
   );
   return response.data.data;
+};
+
+export const createGames = async (data: CreateGamesData) => {
+  const response = await apiService.post("/v1/games", data);
 };

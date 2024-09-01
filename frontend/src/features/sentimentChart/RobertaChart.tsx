@@ -10,7 +10,7 @@ import {
   ChartLegendContent,
 } from "@/components/ui/chart";
 import ChartCard from "./components/ChartCard";
-import { CardContent, CardHeader } from "@/components/ui/card";
+import { CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import ChartCardTitle from "./components/ChartCardTitle";
 import ChartCardDescription from "./components/ChartCardDescription";
 interface RobertaChartProps {
@@ -110,6 +110,7 @@ const RobertaChart = ({ gameReviews, selectedGame }: RobertaChartProps) => {
           </LineChart>
         </ChartContainer>
       </CardContent>
+      <CardFooter></CardFooter>
     </ChartCard>
   );
 };

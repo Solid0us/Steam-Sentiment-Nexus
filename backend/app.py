@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone
 from flask_cors import CORS
 from flask_migrate import Migrate
+import requests
 app = Flask(__name__)
 CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///database.db"
@@ -101,6 +102,15 @@ def games():
         return jsonify({
             "status":"success"
         }),201
+@app.route("/api/v1/steam-apps", methods=["GET"])
+def steamApp():
+    if request.method == "GET":
+        response = requests.get( "https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json")
+        return jsonify({
+            "status": "success",
+            "data": response.json()
+        })
+
     
 @app.route("/api/v1/games/<string:id>/reviews", methods=["GET"])
 def gameReviews(id:str):

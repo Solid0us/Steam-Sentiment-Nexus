@@ -127,7 +127,6 @@ def initialize_review_scraper():
                         print(f"Reached the last cursor value of {next_cursor}")
                         break
                     prev_cursor = next_cursor
-                    break
                 else:
                     break
             reviewSummaryData["robertaPosAvg"] = roberta_pos_sum / number_of_reviews
@@ -147,7 +146,6 @@ def initialize_review_scraper():
             reviewSummaryData["numberScraped"] = number_of_reviews
             update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData)
             end_review_scraping_session(isSuccess=False, scraper_id=scraper_id, debug_message=e)
-        break
     # End Session when entire job is done
     end_review_scraping_session(isSuccess=True, scraper_id=scraper_id)
     input('Pressure "Enter" to close the console.')
