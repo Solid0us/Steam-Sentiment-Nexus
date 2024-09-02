@@ -15,6 +15,17 @@ import { Button } from "@/components/ui/button";
 import { updateGames, UpdateGamesData } from "@/services/gameServices";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import { useToast } from "@/components/hooks/use-toast";
+import { usePagination } from "@/hooks/usePagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import CustomPaginationBlocks from "@/components/pagination/CustomPaginationBlocks";
 
 interface GamesListProps {
   gamesList: SteamGames[];
@@ -32,6 +43,19 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
     };
   }>({});
   const [isChanged, setIsChanged] = useState(false);
+  const {
+    currentPage,
+    endIndex,
+    startIndex,
+    nextPage,
+    prevPage,
+    goToPage,
+    totalPages,
+  } = usePagination({
+    itemsPerPage: 10,
+    totalItems: gamesList.length,
+  });
+
   const handleCheckChange = (
     e: CheckedState,
     gameId: string,
@@ -78,6 +102,13 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
   return (
     <div className="flex flex-col gap-3 p-3">
       <h1 className="text-primary text-lg text-center font-bold">Games List</h1>
+      <CustomPaginationBlocks
+        currentPage={currentPage}
+        goToPage={goToPage}
+        nextPage={nextPage}
+        prevPage={prevPage}
+        totalPages={totalPages}
+      />
       <Table>
         <TableHeader>
           <TableRow>
@@ -92,13 +123,13 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {gamesList?.map((val) => (
+          {gamesList?.slice(startIndex, endIndex).map((val) => (
             <TableRow
               key={val.id}
               className={`${
                 gameActivity[val.id]?.current !==
                   gameActivity[val.id]?.defaultActivity &&
-                "bg-orange-200 hover:bg-orange-300 text-secondary-foreground"
+                "bg-slate-300 hover:bg-slate-400 text-secondary-foreground"
               }`}
             >
               <TableCell className="text-center">{val.id}</TableCell>
