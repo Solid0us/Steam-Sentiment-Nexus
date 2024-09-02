@@ -5,7 +5,7 @@ interface ChartCardDescriptionProps {
 }
 const ChartCardDescription = ({ description }: ChartCardDescriptionProps) => {
   return (
-    <CardDescription className="text-primary-foreground">
+    <CardDescription className="text-primary-foreground text-center">
       {description}
     </CardDescription>
   );

@@ -137,10 +137,26 @@ def gameReviews(id:str):
             "isActive": False
         }
         reviews = []
+        reviews_past_month = 0
+        steam_positive_sum = 0
+        steam_negative_sum = 0
+        roberta_pos_sum = 0
+        roberta_neu_sum = 0
+        roberta_neg_sum = 0
         for game, review in response:
             gameObj["id"] = game.id
             gameObj["name"] = game.name
             gameObj["isActive"] = game.isActive
+            time_difference = datetime.utcnow() - review.end_date
+            # print(time_difference.days)
+            if (time_difference.days <= 30):
+                steam_negative_sum += review.steam_negatives
+                steam_positive_sum += review.steam_positives
+                roberta_neg_sum += review.roberta_neg_avg
+                roberta_neu_sum += review.roberta_neu_avg
+                roberta_pos_sum += review.roberta_pos_avg
+                reviews_past_month += 1
+                print(reviews_past_month)
             reviews.append({
                 "id": review.id,
                 "steamPositives": review.steam_positives,
@@ -157,11 +173,20 @@ def gameReviews(id:str):
                 "success": review.success,
                 "number_scraped": review.number_scraped
             })
+        if reviews_past_month == 0:
+            reviews_past_month = 1
         return jsonify({
             "status": "success",
             "data": {
                 "game": gameObj,
-                "reviews": reviews
+                "reviews": reviews,
+                "pastMonthData": {
+                    "avgSteamPositive": steam_positive_sum / reviews_past_month,
+                    "avgSteamNegative": steam_negative_sum / reviews_past_month,
+                    "avgRobertaPos": roberta_pos_sum / reviews_past_month,
+                    "avgRobertaNeu": roberta_neu_sum / reviews_past_month,
+                    "avgRobertaNeg": roberta_neg_sum / reviews_past_month
+                }
             }
         })
     

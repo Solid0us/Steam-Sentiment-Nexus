@@ -1,6 +1,3 @@
-import { SteamGames } from "@/lib/db_interface";
-import { GetReviewsByGameIdData } from "@/services/gameServices";
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
   ChartConfig,
   ChartContainer,
@@ -9,14 +6,9 @@ import {
   ChartLegend,
   ChartLegendContent,
 } from "@/components/ui/chart";
-import ChartCard from "./components/ChartCard";
-import { CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import ChartCardTitle from "./components/ChartCardTitle";
-import ChartCardDescription from "./components/ChartCardDescription";
-interface RobertaChartProps {
-  selectedGame: SteamGames | undefined;
-  gameReviews: GetReviewsByGameIdData | undefined;
-}
+import { Label } from "@/components/ui/label";
+import { GetReviewsByGameIdData } from "@/services/gameServices";
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 
 const chartConfig = {
   robertaPosAvg: {
@@ -33,15 +25,18 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const RobertaChart = ({ gameReviews, selectedGame }: RobertaChartProps) => {
+interface RobertaOverTimeChartProps {
+  gameReviews: GetReviewsByGameIdData | undefined;
+}
+
+const RobertaOverTimeChart = ({ gameReviews }: RobertaOverTimeChartProps) => {
   return (
-    <ChartCard>
-      <CardHeader>
-        <ChartCardTitle title="RoBERTa Sentiment Scores" />
-        <ChartCardDescription description="Sentiment scores using the RoBERTa model over time." />
-      </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig}>
+    <>
+      <div className="w-full flex flex-col items-center">
+        <Label className="text-primary-foreground p-2">
+          Sentiment Scores Over Time
+        </Label>
+        <ChartContainer className="w-full" config={chartConfig}>
           <LineChart accessibilityLayer data={gameReviews?.reviews ?? []}>
             <CartesianGrid vertical={false} />
             <XAxis
@@ -109,10 +104,9 @@ const RobertaChart = ({ gameReviews, selectedGame }: RobertaChartProps) => {
             />
           </LineChart>
         </ChartContainer>
-      </CardContent>
-      <CardFooter></CardFooter>
-    </ChartCard>
+      </div>
+    </>
   );
 };
 
-export default RobertaChart;
+export default RobertaOverTimeChart;

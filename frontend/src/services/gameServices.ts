@@ -22,6 +22,13 @@ export interface GetReviewsByGameIdData {
     steam_review_description: string;
     success: boolean;
   }[];
+  pastMonthData: {
+    avgSteamPositive: number;
+    avgSteamNegative: number;
+    avgRobertaPos: number;
+    avgRobertaNeu: number;
+    avgRobertaNeg: number;
+  };
 }
 
 export interface CreateGamesData {
