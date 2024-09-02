@@ -145,6 +145,19 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell
+              colSpan={2}
+              className="text-left bg-secondary-foreground"
+            >
+              Page {currentPage}/{totalPages}
+            </TableCell>
+            <TableCell className="text-right bg-secondary-foreground">
+              {gamesList.length} Games
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
       {isChanged && (
         <Button
