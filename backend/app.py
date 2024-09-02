@@ -41,6 +41,8 @@ class SteamReviews(db.Model):
     success = db.Column(db.Boolean, default=False)
     scraper_session_id = db.Column(db.Integer, db.ForeignKey("review_scraper_sessions.id"), nullable=False)
     number_scraped = db.Column(db.Integer, default=0)
+    steam_pos_avg = db.Column(db.Float, nullable=True)
+    steam_neg_avg = db.Column(db.Float, nullable=True)
 
     def __init__(self, game_id:str, 
                 scraper_session_id: int,
@@ -52,7 +54,9 @@ class SteamReviews(db.Model):
                 avg_hours_played_pos: float = None,
                 avg_hours_played_neu: float = None,
                 avg_hours_played_neg: float = None,
-                end_date: datetime = None
+                end_date: datetime = None,
+                steam_pos_avg: float = None,
+                steam_neg_avg: float = None
                 ):
         self.game_id = game_id
         self.steam_positives = steam_positives
@@ -67,6 +71,8 @@ class SteamReviews(db.Model):
         self.created_date = datetime.now(timezone.utc)
         self.scraper_session_id = scraper_session_id
         self.end_date = end_date
+        self.steam_pos_avg = steam_pos_avg
+        self.steam_neg_avg = steam_neg_avg
 
 class ReviewScraperSessions(db.Model):
     __tablename__ = "review_scraper_sessions"
@@ -148,7 +154,6 @@ def gameReviews(id:str):
             gameObj["name"] = game.name
             gameObj["isActive"] = game.isActive
             time_difference = datetime.utcnow() - review.end_date
-            # print(time_difference.days)
             if (time_difference.days <= 30):
                 steam_negative_sum += review.steam_negatives
                 steam_positive_sum += review.steam_positives
@@ -264,6 +269,10 @@ def review(id:int):
                 review_to_update.end_date = datetime.now(timezone.utc)
             if "numberScraped" in req_body:
                 review_to_update.number_scraped = req_body["numberScraped"]
+            if "steamPosAvg" in req_body:
+                review_to_update.steam_pos_avg = req_body["steamPosAvg"]
+            if ("steamNegAvg") in req_body:
+                review_to_update.steam_neg_avg = req_body["steamNegAvg"]
             print(f"Updating review: {review_to_update.id, review_to_update.end_date}")
             db.session.commit()
         return jsonify({

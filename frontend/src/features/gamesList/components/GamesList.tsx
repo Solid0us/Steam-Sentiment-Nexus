@@ -123,7 +123,7 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {gamesList?.slice(startIndex, endIndex).map((val) => (
+          {gamesList?.slice(startIndex, endIndex + 1).map((val) => (
             <TableRow
               key={val.id}
               className={`${
