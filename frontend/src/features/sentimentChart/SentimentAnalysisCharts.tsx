@@ -39,8 +39,9 @@ const SentimentAnalysisCharts = ({
     }
   }, [gamesList]);
   return (
-    <div className="w-full p-3 flex flex-col gap-3 text-secondary-foreground">
+    <div className="w-full p-3 flex flex-col gap-3 text-secondary-foreground border rounded-lg bg-secondary-foreground">
       <div className="flex flex-col gap-3 items-center">
+        <h1 className="text-primary text-2xl font-bold">Sentiment Analysis</h1>
         <Label className="text-primary-foreground">
           Select a Game to Analyze
         </Label>

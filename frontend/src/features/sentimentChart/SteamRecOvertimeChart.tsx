@@ -20,7 +20,7 @@ const chartConfig = {
     color: "hsl(var(--chart-2))",
   },
   percent: {
-    label: "Percentage Positve",
+    label: "Percentage Positive",
     color: "hsl(var(--chart-2))",
   },
 } satisfies ChartConfig;

@@ -23,7 +23,7 @@ const CustomPaginationBlocks = ({
   totalPages,
 }: CustomPaginationBlocksProps) => {
   return (
-    <Pagination>
+    <Pagination className="text-primary-foreground">
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious onClick={prevPage} href="#" />

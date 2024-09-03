@@ -7,7 +7,6 @@ import GamesList from "../features/gamesList/components/GamesList";
 import { getGames } from "../services/gameServices";
 import { SteamGames } from "../lib/db_interface";
 import SentimentAnalysisCharts from "../features/sentimentChart/SentimentAnalysisCharts";
-import AddGamesToListDialogButton from "@/features/addGamesToList/AddGamesToListDialogButton";
 import { createContext } from "react";
 
 export const GameListContext = createContext<{
@@ -25,20 +24,17 @@ const HomePage = () => {
 
   return (
     <GameListContext.Provider value={{ gamesList, refetchGamesList }}>
-      <div className="p-3">
-        <h1 className="font-bold text-primary-foreground text-4xl text-center p-3">
+      <div className="p-3 flex flex-col items-center gap-5">
+        <h1 className="font-bold text-primary text-4xl text-center p-3">
           Steam Sentiment Analysis
         </h1>
-        <section className="border rounded-lg p-2">
+        <section className="border rounded-lg p-2 bg-secondary-foreground">
           <GamesList
             gamesList={gamesList ?? []}
             refetchGamesList={refetchGamesList}
           />
         </section>
-        <section className="w-full items-center flex justify-center p-3">
-          <AddGamesToListDialogButton gamesList={gamesList ?? []} />
-        </section>
-        <section>
+        <section className="bg-secondary-foreground">
           <SentimentAnalysisCharts gamesList={gamesList ?? []} />
         </section>
       </div>

@@ -67,7 +67,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-secondary-foreground;
+    @apply bg-popover-foreground;
   }
 }
 @media (prefers-color-scheme: dark) {

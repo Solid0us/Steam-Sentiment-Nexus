@@ -18,7 +18,7 @@ const AddGamesToListDialogButton = ({
       onOpenChange={(e) => setAddGameDialogOpen(e)}
     >
       <DialogTrigger asChild>
-        <Button>Add Game to Scraper List</Button>
+        <Button>+ Add Game to Scraper List</Button>
       </DialogTrigger>
       <DialogContent className="bg-secondary-foreground text-primary-foreground w-full max-h-screen overflow-auto">
         {

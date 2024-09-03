@@ -163,7 +163,12 @@ const AddGamesToListForm = ({
             </TableBody>
           </Table>
         </div>
-        <Button onClick={handleSubmit} className="ml-auto mr-auto">
+        <Button
+          onClick={handleSubmit}
+          className={`ml-auto mr-auto ${
+            gamesToAdd.length === 0 && "opacity-45 pointer-events-none"
+          }`}
+        >
           Add to Database
         </Button>
       </div>

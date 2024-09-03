@@ -16,16 +16,9 @@ import { updateGames, UpdateGamesData } from "@/services/gameServices";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import { useToast } from "@/components/hooks/use-toast";
 import { usePagination } from "@/hooks/usePagination";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
 import CustomPaginationBlocks from "@/components/pagination/CustomPaginationBlocks";
+import AddGamesToListDialogButton from "@/features/addGamesToList/AddGamesToListDialogButton";
+import { Separator } from "@/components/ui/separator";
 
 interface GamesListProps {
   gamesList: SteamGames[];
@@ -100,16 +93,26 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
     }
   }, [gameActivity]);
   return (
-    <div className="flex flex-col gap-3 p-3">
-      <h1 className="text-primary text-lg text-center font-bold">Games List</h1>
-      <CustomPaginationBlocks
-        currentPage={currentPage}
-        goToPage={goToPage}
-        nextPage={nextPage}
-        prevPage={prevPage}
-        totalPages={totalPages}
-      />
-      <Table>
+    <div className="flex flex-col gap-3 p-3 bg-secondary-foreground">
+      <h1 className="text-primary text-2xl text-center font-bold">
+        Games List
+      </h1>
+      <h4 className="text-center text-base text-primary-foreground">
+        View and toggle which Steam games the web scraper should collect data
+        for. You can add more games to the database by clicking the "Add Game to
+        Scraper List" button to browse Steam's catalog,
+      </h4>
+      <div className="ml-auto p-1">
+        <CustomPaginationBlocks
+          currentPage={currentPage}
+          goToPage={goToPage}
+          nextPage={nextPage}
+          prevPage={prevPage}
+          totalPages={totalPages}
+        />
+      </div>
+      <Separator />
+      <Table className="bg-slate-800">
         <TableHeader>
           <TableRow>
             {GAMES_LIST_HEADERS.map((header) => (
@@ -122,7 +125,7 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
             ))}
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="text-primary-foreground">
           {gamesList?.slice(startIndex, endIndex + 1).map((val) => (
             <TableRow
               key={val.id}
@@ -145,7 +148,7 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
             </TableRow>
           ))}
         </TableBody>
-        <TableFooter>
+        <TableFooter className="text-primary-foreground">
           <TableRow>
             <TableCell
               colSpan={2}
@@ -167,6 +170,9 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
           Save Changes
         </Button>
       )}
+      <div className="w-full flex justify-center">
+        <AddGamesToListDialogButton gamesList={gamesList ?? []} />
+      </div>
     </div>
   );
 };
