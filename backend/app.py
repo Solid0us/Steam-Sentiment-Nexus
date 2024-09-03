@@ -149,6 +149,8 @@ def gameReviews(id:str):
         roberta_pos_sum = 0
         roberta_neu_sum = 0
         roberta_neg_sum = 0
+        steam_month_pos_sum = 0
+        steam_month_neg_sum = 0
         for game, review in response:
             gameObj["id"] = game.id
             gameObj["name"] = game.name
@@ -160,6 +162,8 @@ def gameReviews(id:str):
                 roberta_neg_sum += review.roberta_neg_avg
                 roberta_neu_sum += review.roberta_neu_avg
                 roberta_pos_sum += review.roberta_pos_avg
+                steam_month_pos_sum += review.steam_pos_avg
+                steam_month_neg_sum += review.steam_neg_avg
                 reviews_past_month += 1
                 print(reviews_past_month)
             reviews.append({
@@ -176,7 +180,9 @@ def gameReviews(id:str):
                 "createdDate": review.created_date,
                 "endDate": review.end_date,
                 "success": review.success,
-                "number_scraped": review.number_scraped
+                "number_scraped": review.number_scraped,
+                "avgSteamPos": review.steam_pos_avg,
+                "avgSteamNeg": review.steam_neg_avg
             })
         if reviews_past_month == 0:
             reviews_past_month = 1
@@ -190,7 +196,9 @@ def gameReviews(id:str):
                     "avgSteamNegative": steam_negative_sum / reviews_past_month,
                     "avgRobertaPos": roberta_pos_sum / reviews_past_month,
                     "avgRobertaNeu": roberta_neu_sum / reviews_past_month,
-                    "avgRobertaNeg": roberta_neg_sum / reviews_past_month
+                    "avgRobertaNeg": roberta_neg_sum / reviews_past_month,
+                    "avgSteamMonthPositive": steam_month_pos_sum / reviews_past_month,
+                    "avgSteamMonthNegative": steam_month_neg_sum / reviews_past_month
                 }
             }
         })

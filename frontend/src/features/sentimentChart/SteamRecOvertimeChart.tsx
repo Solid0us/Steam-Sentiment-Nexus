@@ -66,7 +66,9 @@ const SteamRecOvertimeChart = ({
   return (
     <div className="flex flex-col w-full items-center">
       <Label className="text-primary-foreground p-2">
-        Average Sentiment Scores Over the Past 30 Days
+        {percentView
+          ? "Steam Recommendation in Percent Over Time"
+          : "Steam Total Recommendations Over Time"}
       </Label>
       <ChartContainer className="w-full" config={chartConfig}>
         <LineChart

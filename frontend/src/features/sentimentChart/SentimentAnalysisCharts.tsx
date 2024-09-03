@@ -11,7 +11,8 @@ import { Label } from "../../components/ui/label";
 import { getReviewsByGameId } from "../../services/gameServices";
 import { useQuery } from "@tanstack/react-query";
 import RobertaCharts from "./RobertaCharts";
-import SteamRecommendationCharts from "./SteamRecommendationCharts";
+import SteamTotalRecommendationCharts from "./SteamTotalRecommendationCharts";
+import SteamRecPastMonthCharts from "./SteamRecPastMonthCharts";
 
 interface SentimentAnalysisChartProps {
   gamesList: SteamGames[];
@@ -63,14 +64,11 @@ const SentimentAnalysisCharts = ({
           </SelectTrigger>
         </Select>
         <div className="flex flex-col items-center justify-center w-full gap-3">
-          <RobertaCharts
-            gameReviews={gameReviews}
-            selectedGame={selectedGame}
-          />
-          <SteamRecommendationCharts
-            gameReviews={gameReviews}
-            selectedGame={selectedGame}
-          />
+          <div className="flex flex-col lg:flex-row gap-3">
+            <RobertaCharts gameReviews={gameReviews} />
+            <SteamRecPastMonthCharts gameReviews={gameReviews} />
+          </div>
+          <SteamTotalRecommendationCharts gameReviews={gameReviews} />
         </div>
       </div>
     </div>

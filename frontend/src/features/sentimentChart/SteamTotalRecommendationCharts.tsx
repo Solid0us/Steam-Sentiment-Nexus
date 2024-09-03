@@ -10,25 +10,17 @@ import SteamRecOvertimeChart from "./SteamRecOvertimeChart";
 import SteamRecLastMonthPieChart from "./SteamRecLastMonthPieChart";
 
 interface SteamRecommendationChartProps {
-  selectedGame: SteamGames | undefined;
   gameReviews: GetReviewsByGameIdData | undefined;
 }
 
-type PercentPositiveData = {
-  percent: number;
-  createdDate: Date;
-  endDate: Date;
-}[];
-
-const SteamRecommendationCharts = ({
+const SteamTotalRecommendationCharts = ({
   gameReviews,
-  selectedGame,
 }: SteamRecommendationChartProps) => {
   const [percentView, setPercentView] = useState(false);
   return (
     <ChartCard>
       <CardHeader>
-        <ChartCardTitle title="Steam Recommendation" />
+        <ChartCardTitle title="Steam Total Recommendation" />
         <ChartCardDescription description="Steam recommendation scores over time." />
         <div className="flex flex-row justify-start">
           <Button
@@ -67,4 +59,4 @@ const SteamRecommendationCharts = ({
   );
 };
 
-export default SteamRecommendationCharts;
+export default SteamTotalRecommendationCharts;

@@ -7,19 +7,18 @@ import ChartCardDescription from "./components/ChartCardDescription";
 import RobertaOverTimeChart from "./RobertaOvertimeChart";
 import RobertaLastMonthChart from "./RobertaLastMonthChart";
 interface RobertaChartProps {
-  selectedGame: SteamGames | undefined;
   gameReviews: GetReviewsByGameIdData | undefined;
 }
 
-const RobertaCharts = ({ gameReviews, selectedGame }: RobertaChartProps) => {
+const RobertaCharts = ({ gameReviews }: RobertaChartProps) => {
   return (
     <ChartCard>
       <CardHeader>
         <ChartCardTitle title="RoBERTa Sentiment Scores" />
-        <ChartCardDescription description="Sentiment scores using the RoBERTa model over time." />
+        <ChartCardDescription description="Sentiment scores using the RoBERTa model. Each data point averages scores of the reviews in the past 30 days from the time of scraping." />
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col lg:flex-row gap-5 items-center">
+        <div className="flex flex-col gap-5 items-center">
           <RobertaOverTimeChart gameReviews={gameReviews} />
           <RobertaLastMonthChart gameReviews={gameReviews} />
         </div>
