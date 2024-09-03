@@ -14,7 +14,7 @@ const RobertaCharts = ({ gameReviews }: RobertaChartProps) => {
   return (
     <ChartCard>
       <CardHeader>
-        <ChartCardTitle title="RoBERTa Sentiment Scores" />
+        <ChartCardTitle title="RoBERTa Sentiment Scores Sampled by Past Month" />
         <ChartCardDescription description="Sentiment scores using the RoBERTa model. Each data point averages scores of the reviews in the past 30 days from the time of scraping." />
       </CardHeader>
       <CardContent>

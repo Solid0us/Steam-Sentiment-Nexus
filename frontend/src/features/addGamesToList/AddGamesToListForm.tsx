@@ -50,6 +50,7 @@ const AddGamesToListForm = ({
   const { data: steamGames } = useQuery({
     queryKey: ["steamGames"],
     queryFn: () => getAllSteamGames(),
+    staleTime: 60 * 60 * 24 * 1000,
   });
 
   const filteredSteamGames = useMemo(

@@ -14,11 +14,11 @@ const chartConfig = {
     label: "Score",
   },
   avgSteamPositive: {
-    label: "Recommended",
+    label: "Positive",
     color: "hsl(var(--chart-6))",
   },
   avgSteamNegative: {
-    label: "Not Recommended",
+    label: "Negative",
     color: "hsl(var(--chart-8))",
   },
 } satisfies ChartConfig;
