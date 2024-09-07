@@ -17,6 +17,7 @@ class SteamGames(db.Model):
     name = db.Column(db.String, nullable=False)
     isActive = db.Column(db.Boolean, default=True)
     reviews = db.relationship("SteamReviews")
+    news = db.relationship("GameNews")
 
     def __init__(self, id:str, name:str, isActive=True):
         self.id = id
@@ -82,6 +83,61 @@ class ReviewScraperSessions(db.Model):
     success = db.Column(db.Boolean, default=False)
     debug_message = db.Column(db.String, nullable=True)
     reviews = db.relationship("SteamReviews")
+
+class GameNews(db.Model):
+    __tablename__ = "game_news"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    date = db.Column(db.DateTime, nullable=False)
+    title = db.Column(db.String, nullable=False)
+    summary = db.Column(db.String, nullable=False)
+    author = db.Column(db.String, nullable=True)
+    link = db.Column(db.String, nullable = False)
+    game_id = db.Column(db.String, db.ForeignKey('steam_games.id', name="fk_steam_games_id"), nullable=False)
+
+    def __init__(self, date: datetime, title: str, 
+                link:str, game_id: str,
+                summary: str, author: str = None):
+        self.date = date
+        self.title = title
+        self.summary = summary
+        self.author = author
+        self.link = link
+        self.game_id = game_id
+
+@app.route("/api/v1/news", methods=["GET", "POST"])
+def news():
+    if request.method == "GET":
+        news:list[GameNews] = db.session.query(GameNews)
+        news_list = []
+        for article in news:
+            news_list.append({
+                "id": article.id,
+                "date": article.date,
+                "title": article.title,
+                "summary": article.summary,
+                "link": article.link,
+                "gameId": article.game_id 
+            })
+        return jsonify({
+            "status": "success",
+            "data": news_list
+        }), 200
+    else:
+        req_body = request.get_json()
+        news: list[GameNews] = []
+        for article in req_body["news"]:
+            
+            print(datetime.fromisoformat(article["date"]))
+            news_to_add = GameNews(date=datetime.fromisoformat(article["date"]), author=article["author"], 
+                                   link=article["link"], game_id=article["gameId"], 
+                                   title=article["title"], summary=article["summary"])
+            news.append(news_to_add)
+
+        db.session.bulk_save_objects(news)
+        db.session.commit()
+        return  jsonify({
+            "status":"success"
+        }),201
 
 @app.route("/api/v1/games", methods=["GET", "POST", "PATCH"])
 def games():
