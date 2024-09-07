@@ -93,16 +93,20 @@ class GameNews(db.Model):
     author = db.Column(db.String, nullable=True)
     link = db.Column(db.String, nullable = False)
     game_id = db.Column(db.String, db.ForeignKey('steam_games.id', name="fk_steam_games_id"), nullable=False)
+    thumbnail_link = db.Column(db.String, nullable=True)
+    __table_args__ = (db.UniqueConstraint('game_id', 'link', name='_game_id_news_link_uc'),)
 
     def __init__(self, date: datetime, title: str, 
                 link:str, game_id: str,
-                summary: str, author: str = None):
+                summary: str, author: str = None,
+                thumbnail_link:str = None):
         self.date = date
         self.title = title
         self.summary = summary
         self.author = author
         self.link = link
         self.game_id = game_id
+        self.thumbnail_link = thumbnail_link
 
 @app.route("/api/v1/news", methods=["GET", "POST"])
 def news():
@@ -126,7 +130,8 @@ def news():
         req_body = request.get_json()
         news_to_add = GameNews(date=datetime.fromisoformat(req_body["date"]), author=req_body["author"], 
                                 link=req_body["link"], game_id=req_body["gameId"], 
-                                title=req_body["title"], summary=req_body["summary"])
+                                title=req_body["title"], summary=req_body["summary"],
+                                thumbnail_link=req_body["thumbnailLink"] if "thumbnailLink" in req_body else None)
 
         db.session.add(news_to_add)
         db.session.commit()

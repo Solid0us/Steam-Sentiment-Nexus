@@ -81,19 +81,24 @@ def main():
             article_date_obj = datetime.strptime(article_date, "%B %d, %Y")
             article_unix = int(time.mktime(article_date_obj.timetuple()))
             article_link = article.find_element(By.CLASS_NAME, "entry-title-link").get_attribute("href")
+            article_thumbnail_link = None
+            try:
+               article_thumbnail_link = article.find_element(By.CLASS_NAME, "entry-image").get_attribute("src")
+            except:
+               print('no thumbnail')
             if not is_article_recent(article_date_unix=article_unix, month_ago_unix=month_before_now):
                print("End of recent articles")
                next_page_exists = False
                reached_end = True
                break
-            article_author = article.find_element(By.CLASS_NAME, "entry-author").text
+            article_author = article.find_element(By.CLASS_NAME, "entry-author-name").text
             print(f"Summary for: {article_title}")
             print(f"Date: {article_date}, written by {article_author}")
             if not is_relevant_article(title=article_title , game_name=game["name"]):
                print("Not a relevant article")
-               time.sleep(3)
+               time.sleep(2)
                continue
-            time.sleep(3)
+            time.sleep(2)
             article.click()
             time.sleep(1)
             entry_content = driver.find_element(By.CLASS_NAME, "entry-content")
@@ -107,14 +112,14 @@ def main():
             truncated_text = tokenizer.decode(inputs['input_ids'][0], skip_special_tokens=True)
             summary = summarizer(truncated_text,  max_length=150, min_length=10)[0]["summary_text"]
             api_service.create_news(author=article_author, date=datetime.fromtimestamp(article_unix).isoformat(), game_id=game["id"], 
-                                       link=article_link, summary=summary, title=article_title, )
+                                       link=article_link, summary=summary, title=article_title, thumbnail_link=article_thumbnail_link)
             driver.back()
-            time.sleep(3)
+            time.sleep(2)
          if not reached_end:
             try:
                next_page_elem = driver.find_element(By.CLASS_NAME, "pagination-next")
                next_page_elem.click()
-               time.sleep(5)
+               time.sleep(2)
             except:
                next_page_exists = False
          else:
