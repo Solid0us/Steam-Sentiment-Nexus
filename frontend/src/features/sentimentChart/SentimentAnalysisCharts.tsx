@@ -16,13 +16,15 @@ import SteamRecPastMonthCharts from "./SteamRecPastMonthCharts";
 
 interface SentimentAnalysisChartProps {
   gamesList: SteamGames[];
+  selectedGame: SteamGames | undefined;
+  setSelectedGame: React.Dispatch<React.SetStateAction<SteamGames | undefined>>;
 }
 
 const SentimentAnalysisCharts = ({
   gamesList,
+  selectedGame,
+  setSelectedGame,
 }: SentimentAnalysisChartProps) => {
-  const [selectedGame, setSelectedGame] = useState<SteamGames>();
-
   const handleSelectGame = (value: string) => {
     const game = gamesList.find((game) => game.id === value);
     setSelectedGame(game);

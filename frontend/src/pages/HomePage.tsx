@@ -4,10 +4,11 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import GamesList from "../features/gamesList/components/GamesList";
-import { getGames } from "../services/gameServices";
+import { getAllNewsByGameId, getGames } from "../services/gameServices";
 import { SteamGames } from "../lib/db_interface";
 import SentimentAnalysisCharts from "../features/sentimentChart/SentimentAnalysisCharts";
-import { createContext } from "react";
+import { createContext, useState } from "react";
+import GameNews from "@/features/gameNews/GameNews";
 
 export const GameListContext = createContext<{
   gamesList: SteamGames[] | undefined;
@@ -17,9 +18,15 @@ export const GameListContext = createContext<{
 } | null>(null);
 
 const HomePage = () => {
+  const [selectedGame, setSelectedGame] = useState<SteamGames>();
   const { data: gamesList, refetch: refetchGamesList } = useQuery({
     queryKey: ["games"],
     queryFn: () => getGames<SteamGames[]>(),
+  });
+
+  const { data: gameNews } = useQuery({
+    queryKey: ["gameNews", { id: selectedGame?.id }],
+    queryFn: () => getAllNewsByGameId(selectedGame?.id ?? "UNKNOWN"),
   });
 
   return (
@@ -35,7 +42,14 @@ const HomePage = () => {
           />
         </section>
         <section className="bg-secondary-foreground">
-          <SentimentAnalysisCharts gamesList={gamesList ?? []} />
+          <SentimentAnalysisCharts
+            selectedGame={selectedGame}
+            setSelectedGame={setSelectedGame}
+            gamesList={gamesList ?? []}
+          />
+        </section>
+        <section className="flex flex-col gap-3 p-5 bg-secondary-foreground rounded-lg w-full max-w-7xl">
+          <GameNews gameNews={gameNews} selectedGame={selectedGame} />
         </section>
       </div>
     </GameListContext.Provider>

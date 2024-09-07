@@ -50,6 +50,19 @@ export interface UpdateGamesData {
   }[];
 }
 
+export interface GetAllNewsByGameIdData {
+  articles: {
+    author: string;
+    date: Date;
+    gameId: string;
+    id: number;
+    link: string;
+    summary: string;
+    thumbnailLink?: string;
+    title: string;
+  }[];
+}
+
 export const getGames = async <T>() => {
   const response = await apiService.get<{ data: T }>("/v1/games");
   return response.data.data;
@@ -68,4 +81,11 @@ export const createGames = async (data: CreateGamesData) => {
 
 export const updateGames = async (data: UpdateGamesData) => {
   const response = await apiService.patch("v1/games", data);
+};
+
+export const getAllNewsByGameId = async (id: string) => {
+  const response = await apiService.get<{ data: GetAllNewsByGameIdData }>(
+    `/v1/games/${id}/news`
+  );
+  return response.data.data;
 };
