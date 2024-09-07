@@ -185,6 +185,28 @@ def steamApp():
             "data": response.json()
         })
 
+@app.route("/api/v1/games/<string:id>/news", methods=["GET"])
+def gameNews(id:str):
+    if request.method == "GET":
+        response: list[GameNews] = db.session.query(GameNews).filter(GameNews.game_id == id).all()
+        news = []
+        for article in response:
+            news.append({
+                "id": article.id,
+                "date": article.date.isoformat(),
+                "title": article.title,
+                "summary": article.summary,
+                "author": article.author,
+                "link": article.link,
+                "gameId": article.game_id,
+                "thumbnailLink": article.thumbnail_link
+            })
+        return jsonify({
+            "status": "success",
+            "data": {
+                "articles": news
+            }
+        })
     
 @app.route("/api/v1/games/<string:id>/reviews", methods=["GET"])
 def gameReviews(id:str):
