@@ -124,16 +124,11 @@ def news():
         }), 200
     else:
         req_body = request.get_json()
-        news: list[GameNews] = []
-        for article in req_body["news"]:
-            
-            print(datetime.fromisoformat(article["date"]))
-            news_to_add = GameNews(date=datetime.fromisoformat(article["date"]), author=article["author"], 
-                                   link=article["link"], game_id=article["gameId"], 
-                                   title=article["title"], summary=article["summary"])
-            news.append(news_to_add)
+        news_to_add = GameNews(date=datetime.fromisoformat(req_body["date"]), author=req_body["author"], 
+                                link=req_body["link"], game_id=req_body["gameId"], 
+                                title=req_body["title"], summary=req_body["summary"])
 
-        db.session.bulk_save_objects(news)
+        db.session.add(news_to_add)
         db.session.commit()
         return  jsonify({
             "status":"success"
