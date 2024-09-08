@@ -45,7 +45,8 @@ def main():
    driver = webdriver.Chrome(options=options, service=service)
 
    current_time = time.mktime(datetime.now().timetuple())
-   month_before_now = current_time - 2.592e+6
+   month_unix = 2.592e+6
+   months_before_now = current_time - (month_unix * 3)
 
    # Fetch Games
    api_service = ScraperService()
@@ -86,7 +87,7 @@ def main():
                article_thumbnail_link = article.find_element(By.CLASS_NAME, "entry-image").get_attribute("src")
             except:
                print('no thumbnail')
-            if not is_article_recent(article_date_unix=article_unix, month_ago_unix=month_before_now):
+            if not is_article_recent(article_date_unix=article_unix, month_ago_unix=months_before_now):
                print("End of recent articles")
                next_page_exists = False
                reached_end = True
@@ -99,8 +100,8 @@ def main():
                time.sleep(2)
                continue
             time.sleep(2)
-            article.click()
-            time.sleep(1)
+            article.find_element(By.CLASS_NAME, "entry-image-link").click()
+            time.sleep(10)
             entry_content = driver.find_element(By.CLASS_NAME, "entry-content")
             main_article_p_tags = entry_content.find_elements(By.TAG_NAME, "p")
             main_article_text_list = []
