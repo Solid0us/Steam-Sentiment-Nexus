@@ -5,10 +5,13 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 import requests
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 app = Flask(__name__)
 CORS(app)
 # app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///database.db"
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_CONNECTION_STRING"]
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_CONNECTION_STRING")
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
