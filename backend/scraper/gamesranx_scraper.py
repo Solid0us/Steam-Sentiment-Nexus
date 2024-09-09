@@ -46,7 +46,7 @@ def main():
 
    current_time = time.mktime(datetime.now().timetuple())
    month_unix = 2.592e+6
-   months_before_now = current_time - (month_unix * 3)
+   months_before_now = current_time - (month_unix)
 
    # Fetch Games
    api_service = ScraperService()

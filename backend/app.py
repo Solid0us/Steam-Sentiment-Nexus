@@ -4,9 +4,11 @@ from datetime import datetime, timezone
 from flask_cors import CORS
 from flask_migrate import Migrate
 import requests
+import os
 app = Flask(__name__)
 CORS(app)
-app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///database.db"
+# app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///database.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ["DATABASE_CONNECTION_STRING"]
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
@@ -142,7 +144,7 @@ def news():
 @app.route("/api/v1/games", methods=["GET", "POST", "PATCH"])
 def games():
     if request.method == "GET":
-        games = db.session.query(SteamGames)
+        games = db.session.query(SteamGames).order_by(SteamGames.name)
         game_list = []
         for game in games:
             game_list.append({
