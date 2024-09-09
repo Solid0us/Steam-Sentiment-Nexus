@@ -17,9 +17,9 @@ const GameNews = ({ gameNews, selectedGame }: GameNewsProps) => {
             (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
           )
           .map((article) => (
-            <div className="bg-slate-700 rounded-lg p-3 flex flex-row gap-3">
-              <div className="flex flex-col gap-3 w-7/12">
-                <div>
+            <div className="bg-slate-700 rounded-lg p-3 flex flex-col-reverse lg:flex-row gap-3">
+              <div className="flex flex-col gap-3 w-full lg:w-7/12">
+                <div className="text-center lg:text-start">
                   <a
                     className="text-xl font-bold text-primary hover:brightness-125"
                     href={article.link}
@@ -38,14 +38,14 @@ const GameNews = ({ gameNews, selectedGame }: GameNewsProps) => {
                   <p>{article.summary}</p>
                 </div>
               </div>
-              <div className="flex flex-row text-end w-5/12">
+              <div className="flex flex-row w-full lg:w-5/12">
                 <a
-                  className="w-full max-w-fit ml-auto"
+                  className="w-full max-w-fit ml-auto mr-auto lg:mr-0"
                   target="_blank"
                   rel="noopener noreferrer"
                   href={article.link}
                 >
-                  <img className="ml-auto" src={article.thumbnailLink} />
+                  <img src={article.thumbnailLink} />
                 </a>
               </div>
             </div>

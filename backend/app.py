@@ -168,7 +168,6 @@ def games():
         req_body = request.get_json()
         games: list[SteamGames] = []
         for game in req_body["games"]:
-            # print(game["isActive"])
             game_to_update:SteamGames = SteamGames.query.filter_by(id=game["id"]).first()
             game_to_update.isActive = game["isActive"]
         db.session.commit()
@@ -243,7 +242,6 @@ def gameReviews(id:str):
                 steam_month_pos_sum += review.steam_pos_avg
                 steam_month_neg_sum += review.steam_neg_avg
                 reviews_past_month += 1
-                print(reviews_past_month)
             reviews.append({
                 "id": review.id,
                 "steamPositives": review.steam_positives,

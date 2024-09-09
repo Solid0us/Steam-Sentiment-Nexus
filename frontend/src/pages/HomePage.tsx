@@ -9,6 +9,7 @@ import { SteamGames } from "../lib/db_interface";
 import SentimentAnalysisCharts from "../features/sentimentChart/SentimentAnalysisCharts";
 import { createContext, useState } from "react";
 import GameNews from "@/features/gameNews/GameNews";
+import Navbar from "@/components/navbar/Navbar";
 
 export const GameListContext = createContext<{
   gamesList: SteamGames[] | undefined;
@@ -31,10 +32,8 @@ const HomePage = () => {
 
   return (
     <GameListContext.Provider value={{ gamesList, refetchGamesList }}>
+      <Navbar setSelectedGame={setSelectedGame} selectedGame={selectedGame} />
       <div className="p-3 flex flex-col items-center gap-5">
-        <h1 className="font-bold text-primary text-4xl text-center p-3">
-          Steam Sentiment Analysis
-        </h1>
         <section className="border rounded-lg p-2 bg-secondary-foreground">
           <GamesList
             gamesList={gamesList ?? []}

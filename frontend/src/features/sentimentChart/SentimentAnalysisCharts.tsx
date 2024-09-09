@@ -25,10 +25,6 @@ const SentimentAnalysisCharts = ({
   selectedGame,
   setSelectedGame,
 }: SentimentAnalysisChartProps) => {
-  const handleSelectGame = (value: string) => {
-    const game = gamesList.find((game) => game.id === value);
-    setSelectedGame(game);
-  };
   const { data: gameReviews } = useQuery({
     queryKey: ["games", selectedGame?.id],
     queryFn: () => getReviewsByGameId(selectedGame?.id ?? "UNKNOWN"),
@@ -43,29 +39,9 @@ const SentimentAnalysisCharts = ({
   return (
     <div className="w-full p-3 flex flex-col gap-3 text-secondary-foreground border rounded-lg bg-secondary-foreground">
       <div className="flex flex-col gap-3 items-center">
-        <h1 className="text-primary text-2xl font-bold">Sentiment Analysis</h1>
-        <Label className="text-primary-foreground">
-          Select a Game to Analyze
-        </Label>
-        <Select value={selectedGame?.id} onValueChange={handleSelectGame}>
-          <SelectTrigger className="bg-primary-foreground max-w-52">
-            <SelectValue
-              className="text-primary-foreground"
-              placeholder="Select a game"
-            />
-            <SelectContent>
-              {gamesList.map((game) => (
-                <SelectItem
-                  className="text-secondary-foreground"
-                  key={game.id}
-                  value={game.id}
-                >
-                  {game.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </SelectTrigger>
-        </Select>
+        <h1 className="text-primary text-2xl font-bold">
+          {selectedGame?.name} Sentiment Analysis
+        </h1>
         <div className="flex flex-col items-center justify-center w-full gap-3">
           <div className="flex flex-col lg:flex-row gap-3">
             <RobertaCharts gameReviews={gameReviews} />

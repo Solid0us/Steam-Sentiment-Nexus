@@ -93,11 +93,11 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
     }
   }, [gameActivity]);
   return (
-    <div className="flex flex-col gap-3 p-3 bg-secondary-foreground">
+    <div className="flex flex-col gap-3 p-3 bg-secondary-foreground max-w-4xl">
       <h1 className="text-primary text-2xl text-center font-bold">
-        Games List
+        Games Scraper List
       </h1>
-      <h4 className="text-center text-base text-primary-foreground">
+      <h4 className="text-center text-sm text-primary-foreground">
         View and toggle which Steam games the web scraper should collect data
         for. You can add more games to the database by clicking the "Add Game to
         Scraper List" button to browse Steam's catalog,
@@ -165,12 +165,12 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
       {isChanged && (
         <Button
           onClick={handleUpdate}
-          className="ml-auto mr-auto bg-slate-500 hover:bg-slate-600"
+          className="ml-auto mr-auto  bg-slate-500 hover:bg-slate-600"
         >
           Save Changes
         </Button>
       )}
-      <div className="w-full flex justify-center">
+      <div className="w-full flex justify-center mt-auto">
         <AddGamesToListDialogButton gamesList={gamesList ?? []} />
       </div>
     </div>
