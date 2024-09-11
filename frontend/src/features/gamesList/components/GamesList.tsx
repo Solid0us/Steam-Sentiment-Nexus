@@ -154,7 +154,7 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
               colSpan={2}
               className="text-left bg-secondary-foreground"
             >
-              Page {currentPage}/{totalPages}
+              Page {currentPage}/{Math.max(totalPages, 1)}
             </TableCell>
             <TableCell className="text-right bg-secondary-foreground">
               {gamesList.length} Games

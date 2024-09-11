@@ -10,6 +10,8 @@ import SentimentAnalysisCharts from "../features/sentimentChart/SentimentAnalysi
 import { createContext, useState } from "react";
 import GameNews from "@/features/gameNews/GameNews";
 import Navbar from "@/components/navbar/Navbar";
+import useLocalStorage from "@/hooks/useLocalStorage";
+import SpinupNotice from "@/features/SpinupNotice";
 
 export const GameListContext = createContext<{
   gamesList: SteamGames[] | undefined;
@@ -24,7 +26,7 @@ const HomePage = () => {
     queryKey: ["games"],
     queryFn: () => getGames<SteamGames[]>(),
   });
-
+  const [spinUpNotice, setSpinUpNotice] = useLocalStorage("spinupNotice", true);
   const { data: gameNews } = useQuery({
     queryKey: ["gameNews", { id: selectedGame?.id }],
     queryFn: () => getAllNewsByGameId(selectedGame?.id ?? "UNKNOWN"),
@@ -32,6 +34,10 @@ const HomePage = () => {
 
   return (
     <GameListContext.Provider value={{ gamesList, refetchGamesList }}>
+      <SpinupNotice
+        spinUpNotice={spinUpNotice}
+        setSpinUpNotice={setSpinUpNotice}
+      />
       <Navbar setSelectedGame={setSelectedGame} selectedGame={selectedGame} />
       <div className="p-3 flex flex-col items-center gap-5">
         <section className="border rounded-lg p-2 bg-secondary-foreground">
@@ -48,7 +54,10 @@ const HomePage = () => {
           />
         </section>
         <section className="flex flex-col gap-3 p-5 bg-secondary-foreground rounded-lg w-full max-w-7xl">
-          <GameNews gameNews={gameNews} selectedGame={selectedGame} />
+          <GameNews
+            gameNews={gameNews?.articles ?? []}
+            selectedGame={selectedGame}
+          />
         </section>
       </div>
     </GameListContext.Provider>

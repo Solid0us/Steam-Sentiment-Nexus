@@ -1,3 +1,4 @@
+import { GameNewsModel } from "@/lib/db_interface";
 import apiService from "./axiosInstance";
 
 export interface GetReviewsByGameIdData {
@@ -51,16 +52,7 @@ export interface UpdateGamesData {
 }
 
 export interface GetAllNewsByGameIdData {
-  articles: {
-    author: string;
-    date: Date;
-    gameId: string;
-    id: number;
-    link: string;
-    summary: string;
-    thumbnailLink?: string;
-    title: string;
-  }[];
+  articles: GameNewsModel[];
 }
 
 export const getGames = async <T>() => {

@@ -26,7 +26,7 @@ const CustomPaginationBlocks = ({
     <Pagination className="text-primary-foreground">
       <PaginationContent>
         <PaginationItem>
-          <PaginationPrevious onClick={prevPage} href="#" />
+          <PaginationPrevious className="cursor-pointer" onClick={prevPage} />
         </PaginationItem>
         {currentPage - 1 > 0 && (
           <PaginationItem className="cursor-pointer">
@@ -49,7 +49,7 @@ const CustomPaginationBlocks = ({
         )}
         <PaginationItem>{/* <PaginationEllipsis /> */}</PaginationItem>
         <PaginationItem>
-          <PaginationNext onClick={nextPage} href="#" />
+          <PaginationNext className="cursor-pointer" onClick={nextPage} />
         </PaginationItem>
       </PaginationContent>
     </Pagination>
