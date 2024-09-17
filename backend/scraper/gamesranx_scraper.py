@@ -46,7 +46,7 @@ def main():
 
    current_time = time.mktime(datetime.now().timetuple())
    month_unix = 2.592e+6
-   months_before_now = current_time - (month_unix * 3)
+   months_before_now = current_time - (month_unix)
 
    # Fetch Games
    api_service = ScraperService()
@@ -112,8 +112,13 @@ def main():
             inputs = tokenizer(concated_article_text, return_tensors="pt", max_length=1024, truncation=True)
             truncated_text = tokenizer.decode(inputs['input_ids'][0], skip_special_tokens=True)
             summary = summarizer(truncated_text,  max_length=150, min_length=10)[0]["summary_text"]
-            api_service.create_news(author=article_author, date=datetime.fromtimestamp(article_unix).isoformat(), game_id=game["id"], 
+            response = api_service.create_news(author=article_author, date=datetime.fromtimestamp(article_unix).isoformat(), game_id=game["id"], 
                                        link=article_link, summary=summary, title=article_title, thumbnail_link=article_thumbnail_link)
+            if response.status_code == 400:
+               reached_end = True
+               next_page_exists = False
+               driver.back()
+               break
             driver.back()
             time.sleep(2)
          if not reached_end:

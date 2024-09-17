@@ -137,9 +137,14 @@ def news():
                                 link=req_body["link"], game_id=req_body["gameId"], 
                                 title=req_body["title"], summary=req_body["summary"],
                                 thumbnail_link=req_body["thumbnailLink"] if "thumbnailLink" in req_body else None)
-
-        db.session.add(news_to_add)
-        db.session.commit()
+        try:
+            db.session.add(news_to_add)
+            db.session.commit()
+        except:
+            return jsonify({
+                "status": "failure",
+                "message": "Could not create game news."
+            }), 400
         return  jsonify({
             "status":"success"
         }),201
@@ -211,7 +216,7 @@ def gameNews(id:str):
                 "articles": news
             }
         })
-    
+
 @app.route("/api/v1/games/<string:id>/reviews", methods=["GET"])
 def gameReviews(id:str):
     if request.method == "GET":

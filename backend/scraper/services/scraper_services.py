@@ -49,14 +49,15 @@ class ScraperService():
       } for x in games["data"] if x["isActive"] == True]
    
    def create_news(self, date, title, summary, author, link, game_id, thumbnail_link):
-       response = requests.post(f"{FLASK_API_BASE_URL}news", json={
-         "gameId": game_id,
-         "date": date,
-         "author": author,
-         "link": link,
-         "title": title,
-         "summary": summary,
-         "thumbnailLink": thumbnail_link
-      }, headers={
-         "Content-Type": "application/json"
-      })
+      response = requests.post(f"{FLASK_API_BASE_URL}news", json={
+      "gameId": game_id,
+      "date": date,
+      "author": author,
+      "link": link,
+      "title": title,
+      "summary": summary,
+      "thumbnailLink": thumbnail_link
+   }, headers={
+      "Content-Type": "application/json"
+   })
+      return response
