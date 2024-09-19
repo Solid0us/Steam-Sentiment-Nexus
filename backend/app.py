@@ -1,20 +1,24 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from flask_cors import CORS
 from flask_migrate import Migrate
 import requests
 import os
 from dotenv import load_dotenv
+import bcrypt
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 
 load_dotenv()
 app = Flask(__name__)
 CORS(app)
 # app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///database.db"
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_CONNECTION_STRING")
+app.config["JWT_SECRET_KEY"] = os.getenv("SECRET_KEY")
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+jwt = JWTManager(app)
 
 class SteamGames(db.Model):
     __tablename__ = 'steam_games'
@@ -113,228 +117,256 @@ class GameNews(db.Model):
         self.game_id = game_id
         self.thumbnail_link = thumbnail_link
 
-@app.route("/api/v1/news", methods=["GET", "POST"])
-def news():
-    if request.method == "GET":
-        news:list[GameNews] = db.session.query(GameNews)
-        news_list = []
-        for article in news:
-            news_list.append({
-                "id": article.id,
-                "date": article.date,
-                "title": article.title,
-                "summary": article.summary,
-                "link": article.link,
-                "gameId": article.game_id 
-            })
-        return jsonify({
-            "status": "success",
-            "data": news_list
-        }), 200
-    else:
-        req_body = request.get_json()
-        news_to_add = GameNews(date=datetime.fromisoformat(req_body["date"]), author=req_body["author"], 
-                                link=req_body["link"], game_id=req_body["gameId"], 
-                                title=req_body["title"], summary=req_body["summary"],
-                                thumbnail_link=req_body["thumbnailLink"] if "thumbnailLink" in req_body else None)
-        try:
-            db.session.add(news_to_add)
-            db.session.commit()
-        except:
+@app.route("/api/v1/auth/sign-in", methods=["POST"])
+def sign_in():
+    if request.method == "POST":
+        username = request.json.get("username", None)
+        password = request.json.get("password", None)
+        admin_user = os.getenv("ADMIN_USERNAME")
+        admin_pw = os.getenv("ADMIN_PASSWORD")
+        hashed_admin_pw = admin_pw.encode("utf-8")
+        valid_pw = bcrypt.checkpw(password=password.encode("utf-8"), hashed_password=hashed_admin_pw)
+        if valid_pw and admin_user == username:
+            access_token = create_access_token(identity="admin", expires_delta=timedelta(days=1))
+            print(access_token)
             return jsonify({
-                "status": "failure",
-                "message": "Could not create game news."
-            }), 400
-        return  jsonify({
-            "status":"success"
-        }),201
+                "status": "success",
+                "token": access_token
+            }), 201
+        else:
+            return jsonify({
+                "status": "unauthorized"
+            }), 401
 
-@app.route("/api/v1/games", methods=["GET", "POST", "PATCH"])
-def games():
-    if request.method == "GET":
-        games = db.session.query(SteamGames).order_by(SteamGames.name)
-        game_list = []
-        for game in games:
-            game_list.append({
-                "id": game.id,
-                "name": game.name,
-                "isActive": game.isActive
-            })
-        return jsonify({
-            "status": "success",
-            "data": game_list
-        }), 200
-    elif request.method == "POST":
-        req_body = request.get_json()
-        games: list[SteamGames] = []
-        for game in req_body["games"]:
-            games.append(SteamGames(game["id"], game["name"], game["isActive"]))
-        db.session.bulk_save_objects(games)
-        db.session.commit()
-        return jsonify({
-            "status":"success"
-        }),201
-    else:
-        req_body = request.get_json()
-        games: list[SteamGames] = []
-        for game in req_body["games"]:
-            game_to_update:SteamGames = SteamGames.query.filter_by(id=game["id"]).first()
-            game_to_update.isActive = game["isActive"]
-        db.session.commit()
-        return jsonify({
-            "status":"success"
-        }),200
+@app.route("/api/v1/news", methods=["GET"])
+def get_news():
+    news:list[GameNews] = db.session.query(GameNews)
+    news_list = []
+    for article in news:
+        news_list.append({
+            "id": article.id,
+            "date": article.date,
+            "title": article.title,
+            "summary": article.summary,
+            "link": article.link,
+            "gameId": article.game_id 
+        })
+    return jsonify({
+        "status": "success",
+        "data": news_list
+    }), 200
+    
         
+@app.route("/api/v1/news", methods=["POST"])
+@jwt_required()
+def create_news():
+    req_body = request.get_json()
+    news_to_add = GameNews(date=datetime.fromisoformat(req_body["date"]), author=req_body["author"], 
+                            link=req_body["link"], game_id=req_body["gameId"], 
+                            title=req_body["title"], summary=req_body["summary"],
+                            thumbnail_link=req_body["thumbnailLink"] if "thumbnailLink" in req_body else None)
+    try:
+        db.session.add(news_to_add)
+        db.session.commit()
+    except:
+        return jsonify({
+            "status": "failure",
+            "message": "Could not create game news."
+        }), 400
+    return  jsonify({
+        "status":"success"
+    }),201
+
+@app.route("/api/v1/games", methods=["GET"])
+def get_games():
+    games = db.session.query(SteamGames).order_by(SteamGames.name)
+    game_list = []
+    for game in games:
+        game_list.append({
+            "id": game.id,
+            "name": game.name,
+            "isActive": game.isActive
+        })
+    return jsonify({
+        "status": "success",
+        "data": game_list
+    }), 200
+    
+@app.route("/api/v1/games", methods=["POST"])
+@jwt_required()
+def create_games():
+    req_body = request.get_json()
+    games: list[SteamGames] = []
+    for game in req_body["games"]:
+        games.append(SteamGames(game["id"], game["name"], game["isActive"]))
+    db.session.bulk_save_objects(games)
+    db.session.commit()
+    return jsonify({
+        "status":"success"
+    }),201
+
+@app.route("/api/v1/games", methods=["PATCH"])
+@jwt_required()
+def update_games():
+    req_body = request.get_json()
+    for game in req_body["games"]:
+        game_to_update:SteamGames = SteamGames.query.filter_by(id=game["id"]).first()
+        game_to_update.isActive = game["isActive"]
+    db.session.commit()
+    return jsonify({
+        "status":"success"
+    }),200
+
 @app.route("/api/v1/steam-apps", methods=["GET"])
 def steamApp():
-    if request.method == "GET":
-        response = requests.get( "https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json")
-        return jsonify({
-            "status": "success",
-            "data": response.json()
-        })
+    response = requests.get( "https://api.steampowered.com/ISteamApps/GetAppList/v0002/?format=json")
+    return jsonify({
+        "status": "success",
+        "data": response.json()
+    })
 
 @app.route("/api/v1/games/<string:id>/news", methods=["GET"])
 def gameNews(id:str):
-    if request.method == "GET":
-        response: list[GameNews] = db.session.query(GameNews).filter(GameNews.game_id == id).all()
-        news = []
-        for article in response:
-            news.append({
-                "id": article.id,
-                "date": article.date.isoformat(),
-                "title": article.title,
-                "summary": article.summary,
-                "author": article.author,
-                "link": article.link,
-                "gameId": article.game_id,
-                "thumbnailLink": article.thumbnail_link
-            })
-        return jsonify({
-            "status": "success",
-            "data": {
-                "articles": news
-            }
+    response: list[GameNews] = db.session.query(GameNews).filter(GameNews.game_id == id).all()
+    news = []
+    for article in response:
+        news.append({
+            "id": article.id,
+            "date": article.date.isoformat(),
+            "title": article.title,
+            "summary": article.summary,
+            "author": article.author,
+            "link": article.link,
+            "gameId": article.game_id,
+            "thumbnailLink": article.thumbnail_link
         })
+    return jsonify({
+        "status": "success",
+        "data": {
+            "articles": news
+        }
+    })
 
 @app.route("/api/v1/games/<string:id>/reviews", methods=["GET"])
 def gameReviews(id:str):
-    if request.method == "GET":
-        response: list[tuple[SteamGames, SteamReviews]] = \
-            db.session.query(SteamGames, SteamReviews)\
-            .filter(SteamGames.id == id).join(SteamReviews)\
-            .all()
-        gameObj = {
-            "id": "",
-            "name": "",
-            "isActive": False
+    response: list[tuple[SteamGames, SteamReviews]] = \
+        db.session.query(SteamGames, SteamReviews)\
+        .filter(SteamGames.id == id).join(SteamReviews)\
+        .all()
+    gameObj = {
+        "id": "",
+        "name": "",
+        "isActive": False
+    }
+    reviews = []
+    reviews_past_month = 0
+    steam_positive_sum = 0
+    steam_negative_sum = 0
+    roberta_pos_sum = 0
+    roberta_neu_sum = 0
+    roberta_neg_sum = 0
+    steam_month_pos_sum = 0
+    steam_month_neg_sum = 0
+    for game, review in response:
+        gameObj["id"] = game.id
+        gameObj["name"] = game.name
+        gameObj["isActive"] = game.isActive
+        time_difference = datetime.utcnow() - review.end_date
+        if (time_difference.days <= 30):
+            steam_negative_sum += review.steam_negatives
+            steam_positive_sum += review.steam_positives
+            roberta_neg_sum += review.roberta_neg_avg
+            roberta_neu_sum += review.roberta_neu_avg
+            roberta_pos_sum += review.roberta_pos_avg
+            steam_month_pos_sum += review.steam_pos_avg
+            steam_month_neg_sum += review.steam_neg_avg
+            reviews_past_month += 1
+        reviews.append({
+            "id": review.id,
+            "steamPositives": review.steam_positives,
+            "steamNegatives": review.steam_negatives,
+            "steam_review_description": review.steam_review_description,
+            "robertaPosAvg": review.roberta_pos_avg,
+            "robertaNeuAvg": review.roberta_neu_avg,
+            "robertaNegAvg": review.roberta_neg_avg,
+            "avgHoursPlayedPos": review.avg_hours_played_pos,
+            "avgHoursPlayedNeu": review.avg_hours_played_neu,
+            "avgHoursPlayedNeg": review.avg_hours_played_neg,
+            "createdDate": review.created_date,
+            "endDate": review.end_date,
+            "success": review.success,
+            "number_scraped": review.number_scraped,
+            "avgSteamPos": review.steam_pos_avg,
+            "avgSteamNeg": review.steam_neg_avg
+        })
+    if reviews_past_month == 0:
+        reviews_past_month = 1
+    return jsonify({
+        "status": "success",
+        "data": {
+            "game": gameObj,
+            "reviews": reviews,
+            "pastMonthData": {
+                "avgSteamPositive": steam_positive_sum / reviews_past_month,
+                "avgSteamNegative": steam_negative_sum / reviews_past_month,
+                "avgRobertaPos": roberta_pos_sum / reviews_past_month,
+                "avgRobertaNeu": roberta_neu_sum / reviews_past_month,
+                "avgRobertaNeg": roberta_neg_sum / reviews_past_month,
+                "avgSteamMonthPositive": steam_month_pos_sum / reviews_past_month,
+                "avgSteamMonthNegative": steam_month_neg_sum / reviews_past_month
+            }
         }
-        reviews = []
-        reviews_past_month = 0
-        steam_positive_sum = 0
-        steam_negative_sum = 0
-        roberta_pos_sum = 0
-        roberta_neu_sum = 0
-        roberta_neg_sum = 0
-        steam_month_pos_sum = 0
-        steam_month_neg_sum = 0
-        for game, review in response:
-            gameObj["id"] = game.id
-            gameObj["name"] = game.name
-            gameObj["isActive"] = game.isActive
-            time_difference = datetime.utcnow() - review.end_date
-            if (time_difference.days <= 30):
-                steam_negative_sum += review.steam_negatives
-                steam_positive_sum += review.steam_positives
-                roberta_neg_sum += review.roberta_neg_avg
-                roberta_neu_sum += review.roberta_neu_avg
-                roberta_pos_sum += review.roberta_pos_avg
-                steam_month_pos_sum += review.steam_pos_avg
-                steam_month_neg_sum += review.steam_neg_avg
-                reviews_past_month += 1
-            reviews.append({
-                "id": review.id,
-                "steamPositives": review.steam_positives,
-                "steamNegatives": review.steam_negatives,
-                "steam_review_description": review.steam_review_description,
-                "robertaPosAvg": review.roberta_pos_avg,
-                "robertaNeuAvg": review.roberta_neu_avg,
-                "robertaNegAvg": review.roberta_neg_avg,
-                "avgHoursPlayedPos": review.avg_hours_played_pos,
-                "avgHoursPlayedNeu": review.avg_hours_played_neu,
-                "avgHoursPlayedNeg": review.avg_hours_played_neg,
-                "createdDate": review.created_date,
-                "endDate": review.end_date,
-                "success": review.success,
-                "number_scraped": review.number_scraped,
-                "avgSteamPos": review.steam_pos_avg,
-                "avgSteamNeg": review.steam_neg_avg
-            })
-        if reviews_past_month == 0:
-            reviews_past_month = 1
-        return jsonify({
-            "status": "success",
-            "data": {
-                "game": gameObj,
-                "reviews": reviews,
-                "pastMonthData": {
-                    "avgSteamPositive": steam_positive_sum / reviews_past_month,
-                    "avgSteamNegative": steam_negative_sum / reviews_past_month,
-                    "avgRobertaPos": roberta_pos_sum / reviews_past_month,
-                    "avgRobertaNeu": roberta_neu_sum / reviews_past_month,
-                    "avgRobertaNeg": roberta_neg_sum / reviews_past_month,
-                    "avgSteamMonthPositive": steam_month_pos_sum / reviews_past_month,
-                    "avgSteamMonthNegative": steam_month_neg_sum / reviews_past_month
-                }
+    })
+    
+@app.route("/api/v1/reviews", methods=["GET"])
+def get_reviews():
+    review_games: list[tuple[SteamReviews, SteamGames]] = db.session.query(SteamReviews, SteamGames).join(SteamGames).all()
+    review_list = []
+    for review, game in review_games:
+        review_list.append({
+            "id": review.id,
+            "steamPositives": review.steam_positives,
+            "steamNegatives": review.steam_negatives,
+            "steamReviewDescription": review.steam_review_description,
+            "robertaPosAvg": review.roberta_pos_avg,
+            "robertaNeuAvg": review.roberta_neu_avg,
+            "robertaNegAvg": review.roberta_neg_avg,
+            "avgHoursPlayedPos": review.avg_hours_played_pos,
+            "avgHoursPlayedNeu": review.avg_hours_played_neu,
+            "avgHoursPlayedNeg": review.avg_hours_played_neg,
+            "game": {
+                "id": game.id,
+                "name": game.name
             }
         })
+    return jsonify({
+    "status": "success",
+    "data": review_list
+    }), 200
     
-@app.route("/api/v1/reviews", methods=["GET", "POST"])
-def reviews():
-    if request.method == "GET":
-        review_games: list[tuple[SteamReviews, SteamGames]] = db.session.query(SteamReviews, SteamGames).join(SteamGames).all()
-        review_list = []
-        for review, game in review_games:
-            review_list.append({
-                "id": review.id,
-                "steamPositives": review.steam_positives,
-                "steamNegatives": review.steam_negatives,
-                "steamReviewDescription": review.steam_review_description,
-                "robertaPosAvg": review.roberta_pos_avg,
-                "robertaNeuAvg": review.roberta_neu_avg,
-                "robertaNegAvg": review.roberta_neg_avg,
-                "avgHoursPlayedPos": review.avg_hours_played_pos,
-                "avgHoursPlayedNeu": review.avg_hours_played_neu,
-                "avgHoursPlayedNeg": review.avg_hours_played_neg,
-                "game": {
-                    "id": game.id,
-                    "name": game.name
-                }
-            })
-        return jsonify({
-        "status": "success",
-        "data": review_list
-        }), 200
-    else:
-        req_body = request.get_json()
-        try:
-            game_id = req_body["gameId"]
-            scraper_session_id = req_body["scraperSessionId"]
-            review_to_add = SteamReviews(game_id=game_id, scraper_session_id=scraper_session_id)
-            db.session.add(review_to_add)
-            db.session.commit()
-        except Exception as e:
-            print(e)
-            return jsonify({"status": "failure"}), 400
-        return jsonify({
-            "status":"success",
-            "data": {
-                "id": review_to_add.id
-            }
-        }),201
+@app.route("/api/v1/reviews", methods=["POST"])
+@jwt_required()
+def create_reviews():
+    req_body = request.get_json()
+    try:
+        game_id = req_body["gameId"]
+        scraper_session_id = req_body["scraperSessionId"]
+        review_to_add = SteamReviews(game_id=game_id, scraper_session_id=scraper_session_id)
+        db.session.add(review_to_add)
+        db.session.commit()
+    except Exception as e:
+        print(e)
+        return jsonify({"status": "failure"}), 400
+    return jsonify({
+        "status":"success",
+        "data": {
+            "id": review_to_add.id
+        }
+    }),201
     
 @app.route("/api/v1/reviews/<int:id>", methods=["PATCH"])
-def review(id:int):
+@jwt_required()
+def edit_review(id:int):
     req_body = request.get_json()
     review_to_update:SteamReviews = SteamReviews.query.filter_by(id=id).first()
     if request.method == "PATCH":
@@ -373,7 +405,7 @@ def review(id:int):
             "status": "success"
         })
 
-@app.route("/api/v1/review-session-scrapers", methods=["GET", "POST"])
+@app.route("/api/v1/review-session-scrapers", methods=["GET"])
 def review_scrapers():
     if request.method == "GET":
         review_sessions: list[ReviewScraperSessions] = db.session.query(ReviewScraperSessions).all()
@@ -389,18 +421,23 @@ def review_scrapers():
             "status": "success",
             "reviewScrapers": review_sessions_list
         })
-    elif request.method == "POST":
-        new_session = ReviewScraperSessions()
-        db.session.add(new_session)
-        db.session.commit()
-        return jsonify({
-             "status": "success",
-             "data": {
-                 "id": new_session.id
-             }
-        }), 201
+    
+@app.route("/api/v1/review-session-scrapers", methods=["POST"])
+@jwt_required()
+def create_review_scrapers():
+    new_session = ReviewScraperSessions()
+    db.session.add(new_session)
+    db.session.commit()
+    return jsonify({
+            "status": "success",
+            "data": {
+                "id": new_session.id
+            }
+    }), 201
+
 @app.route("/api/v1/review-session-scrapers/<int:id>", methods=["PATCH"])
-def review_scraper(id:int):
+@jwt_required()
+def edit_review_scraper(id:int):
     req_body = request.get_json()
     review_scraper_to_update:ReviewScraperSessions = ReviewScraperSessions.query.filter_by(id=id).first()
     if request.method == "PATCH":

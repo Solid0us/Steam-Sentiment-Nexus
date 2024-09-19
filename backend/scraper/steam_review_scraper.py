@@ -13,6 +13,7 @@ ROBERTA_MODEL = f"cardiffnlp/twitter-roberta-base-sentiment-latest"
 service = ScraperService()
 
 def initialize_review_scraper():
+    token = service.login()
     current_time = time.mktime(datetime.now().timetuple())
     month_before_now = current_time - 2.592e+6
     print(torch.cuda.is_available())
@@ -21,19 +22,18 @@ def initialize_review_scraper():
     
     tokenizer = AutoTokenizer.from_pretrained(ROBERTA_MODEL)
     roberta_model = AutoModelForSequenceClassification.from_pretrained(ROBERTA_MODEL).to(device)
-    print()
     try:
         games_list = service.get_active_games()
     except Exception as e:
         print(e)
         print("Something went wrong")
         return 
-    scraper_id = service.create_review_scraping_session()
-   
+    scraper_id = service.create_review_scraping_session(token)
     for game in games_list:
         created_review_id = service.create_review(
             gameId=game["id"],
-            scrapperSessionId=scraper_id
+            scrapperSessionId=scraper_id,
+            token=token
         )
         # purchase_type=all is needed for games that are for free, not paid though steam, or received the game for free
         url = f"https://store.steampowered.com/appreviews/{game['id']}?json=1&language=english&filter=recent&num_per_page=100&purchase_type=all"
@@ -126,16 +126,16 @@ def initialize_review_scraper():
             reviewSummaryData["endDate"] = datetime.now(timezone.utc).isoformat()
             reviewSummaryData["success"] = True
             reviewSummaryData["numberScraped"] = number_of_reviews
-            service.update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData)
+            service.update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData, token=token)
         except Exception as e:
             print(f"Something went wrong with game ID:{game['id']}")
             reviewSummaryData["endDate"] = datetime.now(timezone.utc).isoformat()
             reviewSummaryData["success"] = False
             reviewSummaryData["numberScraped"] = number_of_reviews
-            service.update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData)
-            service.end_review_scraping_session(isSuccess=False, scraper_id=scraper_id, debug_message=e)
+            service.update_review(reviewId=created_review_id, reviewSummaryData=reviewSummaryData, token=token)
+            service.end_review_scraping_session(isSuccess=False, scraper_id=scraper_id, debug_message=e, token=token)
     # End Session when entire job is done
-    service.end_review_scraping_session(isSuccess=True, scraper_id=scraper_id)
+    service.end_review_scraping_session(isSuccess=True, scraper_id=scraper_id, token=token)
     input('Pressure "Enter" to close the console.')
     
         

@@ -34,6 +34,8 @@ def is_article_recent(month_ago_unix:int, article_date_unix: int):
 
 def main():
    # Initalize summarizer and driver settings
+   api_service = ScraperService()
+   token = api_service.login()
    model = "facebook/bart-large-cnn"
    summarizer = pipeline("summarization", model=model, truncation=True)
    tokenizer = AutoTokenizer.from_pretrained(model)
@@ -48,8 +50,6 @@ def main():
    month_unix = 2.592e+6
    months_before_now = current_time - (month_unix)
 
-   # Fetch Games
-   api_service = ScraperService()
    games = api_service.get_active_games()
 
 
@@ -113,7 +113,7 @@ def main():
             truncated_text = tokenizer.decode(inputs['input_ids'][0], skip_special_tokens=True)
             summary = summarizer(truncated_text,  max_length=150, min_length=10)[0]["summary_text"]
             response = api_service.create_news(author=article_author, date=datetime.fromtimestamp(article_unix).isoformat(), game_id=game["id"], 
-                                       link=article_link, summary=summary, title=article_title, thumbnail_link=article_thumbnail_link)
+                                       link=article_link, summary=summary, title=article_title, thumbnail_link=article_thumbnail_link, token=token)
             if response.status_code == 400:
                reached_end = True
                next_page_exists = False
