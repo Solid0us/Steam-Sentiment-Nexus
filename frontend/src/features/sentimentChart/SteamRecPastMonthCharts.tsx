@@ -2,8 +2,6 @@ import ChartCard from "./components/ChartCard";
 import ChartCardTitle from "./components/ChartCardTitle";
 import ChartCardDescription from "./components/ChartCardDescription";
 import { CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import SteamRecPastMonthOvertimeChart from "./SteamRecPastMonthOvertimeChart";
 import { GetReviewsByGameIdData } from "@/services/gameServices";
 import SteamRecPastMonthPieChart from "./SteamRecPastMonthPieChart";

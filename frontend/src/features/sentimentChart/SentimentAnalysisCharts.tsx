@@ -1,13 +1,5 @@
 import { useEffect, useState } from "react";
 import { SteamGames } from "../../lib/db_interface";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select";
-import { Label } from "../../components/ui/label";
 import { getReviewsByGameId } from "../../services/gameServices";
 import { useQuery } from "@tanstack/react-query";
 import RobertaCharts from "./RobertaCharts";

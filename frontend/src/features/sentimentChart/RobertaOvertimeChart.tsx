@@ -36,7 +36,10 @@ const RobertaOverTimeChart = ({ gameReviews }: RobertaOverTimeChartProps) => {
         <Label className="text-primary-foreground p-2">
           Sentiment Scores Over Time
         </Label>
-        <ChartContainer className="w-full" config={chartConfig}>
+        <ChartContainer
+          className="w-full aspect-square md:aspect-video"
+          config={chartConfig}
+        >
           <LineChart accessibilityLayer data={gameReviews?.reviews ?? []}>
             <CartesianGrid vertical={false} />
             <XAxis

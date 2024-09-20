@@ -70,7 +70,10 @@ const SteamRecOvertimeChart = ({
           ? "Steam Recommendation in Percent Over Time"
           : "Steam Total Recommendations Over Time"}
       </Label>
-      <ChartContainer className="w-full" config={chartConfig}>
+      <ChartContainer
+        className="w-full aspect-square md:aspect-video"
+        config={chartConfig}
+      >
         <LineChart
           accessibilityLayer
           data={percentView ? percentPositiveData : gameReviews?.reviews ?? []}

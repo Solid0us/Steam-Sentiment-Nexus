@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/chart";
 import { Label } from "@/components/ui/label";
 import { GetReviewsByGameIdData } from "@/services/gameServices";
-import { useEffect, useState } from "react";
 
 const chartConfig = {
   avgSteamPos: {
@@ -38,7 +37,10 @@ const SteamRecPastMonthOvertimeChart = ({
       <Label className="text-primary-foreground p-2">
         Steam Recommendation Over Time
       </Label>
-      <ChartContainer className="w-full" config={chartConfig}>
+      <ChartContainer
+        className="w-full aspect-square md:aspect-video"
+        config={chartConfig}
+      >
         <LineChart
           accessibilityLayer
           data={gameReviews?.reviews ?? []}
