@@ -39,50 +39,45 @@ const HomePage = () => {
   const [loginFormOpen, setLoginFormOpen] = useState(false);
   return (
     <GameListContext.Provider value={{ gamesList, refetchGamesList }}>
-      <div className="flex flex-row">
-        <div className="flex flex-col items-center gap-5">
-          <Navbar
+      <div className="flex flex-col items-center gap-5">
+        <Navbar setSelectedGame={setSelectedGame} selectedGame={selectedGame} />
+        <SpinupNotice
+          spinUpNotice={spinUpNotice}
+          setSpinUpNotice={setSpinUpNotice}
+        />
+        {token ? (
+          <section className="border rounded-lg p-2 bg-secondary-foreground">
+            <GamesList
+              gamesList={gamesList ?? []}
+              refetchGamesList={refetchGamesList}
+            />
+          </section>
+        ) : (
+          <Dialog
+            open={loginFormOpen}
+            onOpenChange={(e) => setLoginFormOpen(e)}
+          >
+            <DialogTrigger asChild>
+              <Button className="">Admin Login</Button>
+            </DialogTrigger>
+            <DialogContent className="bg-slate-800 top-60 w-96">
+              <AdminLoginForm />
+            </DialogContent>
+          </Dialog>
+        )}
+        <section className="bg-secondary-foreground">
+          <SentimentAnalysisCharts
+            selectedGame={selectedGame}
             setSelectedGame={setSelectedGame}
+            gamesList={gamesList ?? []}
+          />
+        </section>
+        <section className="flex flex-col gap-3 p-5 bg-secondary-foreground rounded-lg w-full max-w-7xl">
+          <GameNews
+            gameNews={gameNews?.articles ?? []}
             selectedGame={selectedGame}
           />
-          <SpinupNotice
-            spinUpNotice={spinUpNotice}
-            setSpinUpNotice={setSpinUpNotice}
-          />
-          {token ? (
-            <section className="border rounded-lg p-2 bg-secondary-foreground">
-              <GamesList
-                gamesList={gamesList ?? []}
-                refetchGamesList={refetchGamesList}
-              />
-            </section>
-          ) : (
-            <Dialog
-              open={loginFormOpen}
-              onOpenChange={(e) => setLoginFormOpen(e)}
-            >
-              <DialogTrigger asChild>
-                <Button className="">Admin Login</Button>
-              </DialogTrigger>
-              <DialogContent className="bg-slate-800 top-60 w-96">
-                <AdminLoginForm />
-              </DialogContent>
-            </Dialog>
-          )}
-          <section className="bg-secondary-foreground">
-            <SentimentAnalysisCharts
-              selectedGame={selectedGame}
-              setSelectedGame={setSelectedGame}
-              gamesList={gamesList ?? []}
-            />
-          </section>
-          <section className="flex flex-col gap-3 p-5 bg-secondary-foreground rounded-lg w-full max-w-7xl">
-            <GameNews
-              gameNews={gameNews?.articles ?? []}
-              selectedGame={selectedGame}
-            />
-          </section>
-        </div>
+        </section>
       </div>
     </GameListContext.Provider>
   );
