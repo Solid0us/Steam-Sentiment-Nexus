@@ -3,6 +3,7 @@
 ## Live App
 
 https://steam-sentiment-nexus-client.vercel.app/
+
 **_Note: Backend server may take up to a few minutes to spin up._**
 
 ## Project Overview
@@ -38,6 +39,7 @@ PASSWORD= # The unhashed password that the scrapers will used to login with. Thi
 ```
 
 3. Initalize the server by inserting the following into the command line:
+
    `py -m app`
 
 ### Frontend
@@ -51,6 +53,7 @@ PASSWORD= # The unhashed password that the scrapers will used to login with. Thi
 ```
 
 3. Initalize the frontend by inserting the following into the command line:
+
    `npm run dev`
 
 ## Scrapers
