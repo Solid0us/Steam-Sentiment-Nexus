@@ -1,5 +1,10 @@
 # Steam Sentiment Nexus
 
+## Live App
+
+https://steam-sentiment-nexus-client.vercel.app/
+**_Note: Backend server may take up to a few minutes to spin up._**
+
 ## Project Overview
 
 The live service business model is a common practice in today’s video game market. In the past, gamers purchased physical copies of games, and that was the final version of the game. With live service, however, video game developers can make changes to the game, for better or worse. This capability can cause shifts in gamers’ overall sentiment toward these games.
