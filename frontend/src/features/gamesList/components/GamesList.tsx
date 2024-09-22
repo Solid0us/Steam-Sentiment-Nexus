@@ -19,6 +19,7 @@ import { usePagination } from "@/hooks/usePagination";
 import CustomPaginationBlocks from "@/components/pagination/CustomPaginationBlocks";
 import AddGamesToListDialogButton from "@/features/addGamesToList/AddGamesToListDialogButton";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/components/hooks/useAuth";
 
 interface GamesListProps {
   gamesList: SteamGames[];
@@ -35,6 +36,7 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
       defaultActivity: boolean;
     };
   }>({});
+  const [token] = useAuth();
   const [isChanged, setIsChanged] = useState(false);
   const {
     currentPage,
@@ -72,7 +74,7 @@ const GamesList = ({ gamesList, refetchGamesList }: GamesListProps) => {
       });
     }
     try {
-      await updateGames(data);
+      await updateGames(data, token || "");
       refetchGamesList();
       setGameActivity({});
       setIsChanged(false);

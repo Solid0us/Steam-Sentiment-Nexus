@@ -67,12 +67,20 @@ export const getReviewsByGameId = async (id: string) => {
   return response.data.data;
 };
 
-export const createGames = async (data: CreateGamesData) => {
-  const response = await apiService.post("/v1/games", data);
+export const createGames = async (data: CreateGamesData, token: string) => {
+  const response = await apiService.post("/v1/games", data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
 
-export const updateGames = async (data: UpdateGamesData) => {
-  const response = await apiService.patch("v1/games", data);
+export const updateGames = async (data: UpdateGamesData, token: string) => {
+  const response = await apiService.patch("v1/games", data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 };
 
 export const getAllNewsByGameId = async (id: string) => {

@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { createGames } from "@/services/gameServices";
 import { GameListContext } from "@/pages/HomePage";
 import { useToast } from "@/components/hooks/use-toast";
+import { useAuth } from "@/components/hooks/useAuth";
 
 type GamesToAdd = {
   gameId: string;
@@ -52,7 +53,7 @@ const AddGamesToListForm = ({
     queryFn: () => getAllSteamGames(),
     staleTime: 60 * 60 * 24 * 1000,
   });
-
+  const [token] = useAuth();
   const filteredSteamGames = useMemo(
     () =>
       filterSteamGamesByName({
@@ -78,13 +79,16 @@ const AddGamesToListForm = ({
   };
   const handleSubmit = async () => {
     try {
-      await createGames({
-        games: gamesToAdd.map((game) => ({
-          id: game.gameId,
-          isActive: true,
-          name: game.name,
-        })),
-      });
+      await createGames(
+        {
+          games: gamesToAdd.map((game) => ({
+            id: game.gameId,
+            isActive: true,
+            name: game.name,
+          })),
+        },
+        token ?? ""
+      );
       setAddGameDialogOpen(false);
       refetchGamesList();
       toast({
@@ -112,7 +116,7 @@ const AddGamesToListForm = ({
             {filteredSteamGames.length === 0 ? (
               <p className="text-center">No Results</p>
             ) : (
-              filteredSteamGames.slice(0, 100).map((game) => (
+              filteredSteamGames.slice(0, 500).map((game) => (
                 <li
                   key={game.gameId}
                   className={`hover:cursor-pointer border-b hover:bg-slate-500 ${
